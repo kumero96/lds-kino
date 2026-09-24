@@ -233,7 +233,8 @@ var Scroll = {
         }
         var h = window.innerHeight;
         var rem = h / 54;
-        var cur = -(sc._y || 0);
+        var phone = Scroll.phone();
+        var cur = phone ? document.getElementById("page").scrollTop : -(sc._y || 0);
         var headH = 6.5 * rem;
         var elTop = top, elBottom = top + e.offsetHeight;
         // заголовок ряда тоже должен быть виден
@@ -260,8 +261,16 @@ var Scroll = {
         }
         return null;
     },
+    // на телефоне страница листается пальцем (обычная прокрутка), на ТВ — сдвигом
+    phone: function() {
+        return (" " + document.documentElement.className + " ").indexOf(" phone ") >= 0;
+    },
     to: function(sc, y) {
         sc._y = -y;
+        if (Scroll.phone()) {
+            document.getElementById("page").scrollTop = y;
+            return;
+        }
         var t = "translateY(" + (-y) + "px)";
         sc.style.webkitTransform = t;
         sc.style.transform = t;

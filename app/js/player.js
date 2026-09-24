@@ -33,6 +33,11 @@ var Player = {
         v.setAttribute("preload", "auto");
         Player.video = v;
         p.appendChild(v);
+        // касание/клик по видео: показать панель, повторно — пауза
+        v.onclick = function() {
+            if (Player.uiVisible()) Player.toggle();
+            else Player.showUi();
+        };
         Player.buildUi(p);
         v.addEventListener("timeupdate", Player.tick);
         v.addEventListener("progress", Player.tick);

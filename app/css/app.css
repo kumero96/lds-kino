@@ -386,3 +386,10 @@ html.phone .grid .card:nth-child(6n) { margin-right: 1.55rem; }
 html.phone .grid .card:nth-child(3n) { margin-right: 0; }
 html.phone .episodes .ep:nth-child(5n) { margin-right: 1rem; }
 html.phone .episodes .ep:nth-child(2n) { margin-right: 0; }
+
+/* телефоны: прокрутка пальцем */
+html.phone #page { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+html.phone .scroll { position: relative; }
+html.phone .row-items { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+html.phone #top { padding: 0 1rem; }
+html.phone .details .poster { width: 100%; height: 0; padding-top: 140%; }
