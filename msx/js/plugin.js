@@ -660,7 +660,8 @@ function catalog(id, callback) {
             header: header,
             footer: footer.items.length ? footer : null,
             // MSX переносит позицию фокуса со старой страницы — явно ставим его на первый фильм
-            ready: { action: "focus:index:0" },
+            // номер считается вместе с кнопками шапки — пропускаем их
+            ready: { action: "focus:index:" + header.items.length },
             template: { type: "separate", layout: "0,0,2,4", color: "msx-glass", imageFiller: "cover" },
             items: items
         });
