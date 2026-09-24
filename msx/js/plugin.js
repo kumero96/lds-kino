@@ -395,29 +395,50 @@ function posterItem(m, layout) {
     return item;
 }
 
-// сетка постеров: 6 в ряд, по 2 ряда на страницу
-function posterPages(movies, headline, moreAction) {
+// шапка как в ТВ-приложении: логотип и кнопки разделов (занимает верхний ряд сетки 12×6)
+var NAV = [["home", "home", "Главная"], ["search", "search", "Поиск"], ["fav", "star", "Избранное"], ["cat~0~~~~~0", "tune", "Каталог"], ["history", "history", "История"]];
+
+function navItems(active) {
+    var items = [{
+        type: "space", layout: "0,0,2,1", image: BASE + "img/logo.png", imageFiller: "fit", round: 0
+    }];
+    for (var i = 0; i < NAV.length; i++) {
+        items.push({
+            type: "button", layout: (2 + i * 2) + ",0,2,1",
+            label: "{ico:" + NAV[i][1] + "} " + NAV[i][2],
+            color: NAV[i][0] === active ? BLUE : null,
+            action: NAV[i][0] === active ? "reload:content" : "content:" + req(NAV[i][0])
+        });
+    }
+    return items;
+}
+
+function allTile(layout, action) {
+    return { type: "separate", layout: layout, color: "msx-glass", icon: "arrow-forward", iconSize: "large", title: "Все", action: action };
+}
+
+// ряд постеров: 6 штук (или 5 + «Все»), высота 4 клетки — пропорции настоящего постера
+function posterPages(movies, headline, moreAction, withNav) {
     var pages = [];
     var page = null;
-    for (var i = 0; i < movies.length; i++) {
-        var slot = i % 12;
+    var y = withNav ? 1 : 0;
+    var perPage = 6;
+    var list = moreAction && movies.length >= perPage ? movies.slice(0, perPage - 1) : movies;
+    for (var i = 0; i < list.length; i++) {
+        var slot = i % perPage;
         if (slot === 0) {
-            page = { headline: pages.length === 0 ? headline : null, items: [] };
+            page = { headline: pages.length === 0 ? headline : null, items: pages.length === 0 && withNav ? navItems(withNav) : [] };
             pages.push(page);
         }
-        page.items.push(posterItem(movies[i], (slot % 6) * 2 + "," + Math.floor(slot / 6) * 3 + ",2,3"));
+        page.items.push(posterItem(list[i], slot * 2 + "," + (pages.length === 1 ? y : 0) + ",2,4"));
     }
     if (moreAction && page) {
-        var n = page.items.length;
-        var more = {
-            type: "button",
-            layout: (n % 6) * 2 + "," + Math.floor(n / 6) * 3 + ",2,3",
-            icon: "arrow-forward",
-            label: "Все",
-            action: moreAction
-        };
-        if (n < 12) page.items.push(more);
-        else pages.push({ items: [{ type: "button", layout: "0,0,2,3", icon: "arrow-forward", label: "Все", action: moreAction }] });
+        var n = list.length % perPage;
+        if (n === 0) {
+            page = { items: [] };
+            pages.push(page);
+        }
+        page.items.push(allTile(n * 2 + "," + (pages.length === 1 ? y : 0) + ",2,4", moreAction));
     }
     return pages;
 }
@@ -427,6 +448,7 @@ function content(headline, pages, extra) {
         type: "list",
         headline: headline,
         background: BASE + "img/background.jpg",
+        transparent: 1,
         cache: false,
         pages: pages
     };
@@ -476,6 +498,11 @@ function menu() {
         logoSize: "small",
         headline: "Кинотеатр ЛДС",
         background: BASE + "img/background.jpg",
+        style: "overlay",
+        transparent: 1,
+        extension: "{ico:menu-open} меню — кнопка ◀",
+        // скруглённые углы постеров, как в ТВ-приложении
+        ready: { action: "settings:rounded_style:1" },
         menu: items
     };
 }
@@ -498,16 +525,19 @@ function home(callback) {
     var finish = function() {
         if (--left > 0) return;
         var pages = [];
+        var add = function(list, title, more) {
+            pages = pages.concat(posterPages(list, title, more, pages.length === 0 ? "home" : null));
+        };
         var hist = Store.history();
-        if (hist.length) pages = pages.concat(posterPages(hist.slice(0, 12), "Продолжить просмотр", hist.length > 12 ? "content:" + req("history") : null));
+        if (hist.length) add(hist, "Продолжить просмотр", hist.length > 6 ? "content:" + req("history") : null);
         var favs = Store.favorites();
         var withNew = [];
         for (var f = 0; f < favs.length; f++) if (newEpisodes[favs[f].id] > 0) withNew.push(favs[f]);
-        if (withNew.length) pages = pages.concat(posterPages(withNew, "Новые серии в избранном"));
+        if (withNew.length) add(withNew.slice(0, 6), "Новые серии в избранном");
         for (var i = 0; i < HOME_ROWS.length; i++) {
             if (results[i] && results[i].length) {
                 var row = HOME_ROWS[i];
-                pages = pages.concat(posterPages(results[i].slice(0, 11), row.title, row.id ? "content:" + req(row.id) : null));
+                add(results[i], row.title, row.id ? "content:" + req(row.id) : null);
             }
         }
         if (!pages.length) callback(errorContent(failed || "Пустой ответ", "home"));
@@ -584,31 +614,31 @@ function catalog(id, callback) {
         var total = parseInt(r.total, 10) || 0;
         var movies = parseMovies(r.movies);
         // кнопки фильтров — открывают панель выбора
-        var header = { items: [] };
+        var header = { items: navItems(id === "cat~0~~~~~0" ? "cat~0~~~~~0" : null) };
         for (var i = 0; i < FILTERS.length; i++) {
             var f = FILTERS[i];
             var val = labelOf(f.list, s[f.key]);
             header.items.push({
-                type: "button", layout: (i * 2) + ",0,2,1",
+                type: "button", layout: (i * 2) + ",1,2,1",
                 label: "{txt:msx-white-soft:" + f.title + ":} " + val,
                 action: "panel:" + req("pick~" + f.key + "~" + catId(s))
             });
         }
         header.items.push({
-            type: "button", layout: "10,0,2,1", icon: "filter-alt-off", label: "Сброс",
+            type: "button", layout: "10,1,2,1", label: "{ico:filter-alt-off} Сброс",
             action: "replace:content:catalog:" + req("cat~0~~~~~0")
         });
         var items = [];
         if (s.offset > 0) {
             var prev = JSON.parse(JSON.stringify(s));
             prev.offset = Math.max(0, s.offset - PAGE_SIZE);
-            items.push({ type: "button", icon: "arrow-back", label: "Назад", action: "replace:content:catalog:" + req(catId(prev)) });
+            items.push({ type: "separate", color: "msx-glass", icon: "arrow-back", iconSize: "large", title: "Назад", action: "replace:content:catalog:" + req(catId(prev)) });
         }
         for (var j = 0; j < movies.length; j++) items.push(posterItem(movies[j]));
         if (s.offset + PAGE_SIZE < total) {
             var next = JSON.parse(JSON.stringify(s));
             next.offset = s.offset + PAGE_SIZE;
-            items.push({ type: "button", icon: "arrow-forward", label: "Ещё", action: "replace:content:catalog:" + req(catId(next)) });
+            items.push({ type: "separate", color: "msx-glass", icon: "arrow-forward", iconSize: "large", title: "Ещё", action: "replace:content:catalog:" + req(catId(next)) });
         }
         if (!movies.length) {
             items.push({ type: "space", color: "msx-glass", label: "Ничего не найдено — уберите часть фильтров" });
@@ -621,8 +651,9 @@ function catalog(id, callback) {
             headline: "Каталог",
             extension: "{ico:local-movies} " + (total ? from + "–" + Math.min(s.offset + PAGE_SIZE, total) + " из " + total : "0"),
             background: BASE + "img/background.jpg",
+            transparent: 1,
             header: header,
-            template: { type: "separate", layout: "0,0,2,3", color: "msx-glass", imageFiller: "cover" },
+            template: { type: "separate", layout: "0,0,2,4", color: "msx-glass", imageFiller: "cover" },
             items: items
         });
     }, function(e) {
@@ -660,19 +691,20 @@ function picker(id, callback) {
 
 /* ---------- избранное и история ---------- */
 
-function listScreen(headline, movies, emptyText) {
+function listScreen(active, headline, movies, emptyText) {
     if (!movies.length) {
-        return content(headline, [{
-            items: [{ type: "space", layout: "0,0,12,2", color: "msx-glass", headline: headline, text: emptyText },
-                { type: "button", layout: "0,2,3,1", icon: "home", label: "На главную", action: "content:" + req("home") }]
-        }]);
+        var items0 = navItems(active);
+        items0.push({ type: "space", layout: "0,1,12,2", color: "msx-glass", headline: headline, text: emptyText });
+        return content(headline, [{ items: items0 }]);
     }
     var items = [];
     for (var i = 0; i < movies.length; i++) items.push(posterItem(movies[i]));
     return {
         type: "list", cache: false, headline: headline,
         background: BASE + "img/background.jpg",
-        template: { type: "separate", layout: "0,0,2,3", color: "msx-glass", imageFiller: "cover" },
+        transparent: 1,
+        header: { items: navItems(active) },
+        template: { type: "separate", layout: "0,0,2,4", color: "msx-glass", imageFiller: "cover" },
         items: items
     };
 }
@@ -720,14 +752,14 @@ function movieScreen(id, callback) {
         if (d.directors.length) lines.push("{col:msx-white-soft}Режиссёр: " + d.directors.join(", "));
         if (d.cast.length) lines.push("{col:msx-white-soft}В ролях: " + d.cast.join(", "));
         if (voices.length) lines.push("{col:msx-white-soft}Озвучка: " + voices.join(", "));
-        var desc = d.description.length > 420 ? d.description.substring(0, 400).replace(/\s+\S*$/, "") + "…" : d.description;
+        var desc = d.description.length > 300 ? d.description.substring(0, 280).replace(/\s+\S*$/, "") + "…" : d.description;
         var text = lines.join("{br}") + "{br}{br}{col:msx-white}" + desc;
 
-        var head = [{
-            type: "space", layout: "0,0,3,5", color: "msx-glass", image: d.poster, imageFiller: "cover"
+        var head = navItems(null).concat([{
+            type: "space", layout: "0,1,3,5", color: "msx-glass", image: d.poster, imageFiller: "cover"
         }, {
-            type: "space", layout: "3,0,9,5", text: text
-        }];
+            type: "space", layout: "3,1,9,4", text: text
+        }]);
         var bi = 0;
         var button = function(icon, label, action, color) {
             var b = { type: "button", layout: (3 + bi * 3) + ",5,3,1", label: label, action: action };
@@ -816,6 +848,7 @@ function movieScreen(id, callback) {
             type: "list", flag: "movie", cache: false,
             headline: d.name,
             background: BASE + "img/background.jpg",
+            transparent: 1,
             pages: pages
         });
     }, function(e) {
@@ -930,16 +963,17 @@ function keyboardPage() {
     var items = [];
     var keys = KEYS[kb.lang];
     for (var i = 0; i < keys.length; i++) {
-        items.push(keyButton(kb.lang === "ru" ? keys[i].toUpperCase() : keys[i].toUpperCase(), i % 12, Math.floor(i / 12), 1, "key~" + keys[i]));
+        items.push(keyButton(keys[i].toUpperCase(), i % 12, 1 + Math.floor(i / 12), 1, "key~" + keys[i]));
     }
-    for (var d = 0; d < DIGITS.length; d++) items.push(keyButton(DIGITS[d], d, 3, 1, "key~" + DIGITS[d]));
-    items.push(keyButton("{ico:backspace}", 10, 3, 2, "ctl~back"));
-    items.push(keyButton("{ico:space-bar} Пробел", 0, 4, 4, "ctl~space"));
-    items.push(keyButton("{ico:clear} Стереть всё", 4, 4, 3, "ctl~clear"));
-    items.push(keyButton("{ico:language} " + (kb.lang === "ru" ? "EN" : "RU"), 7, 4, 2, "ctl~lang"));
-    if (kb.mode === "report") items.push(keyButton("{ico:send} Отправить", 9, 4, 3, "ctl~submit"));
-    else items.push(keyButton("{ico:search} Найти", 9, 4, 3, "ctl~submit"));
+    for (var d = 0; d < DIGITS.length; d++) items.push(keyButton(DIGITS[d], d, 4, 1, "key~" + DIGITS[d]));
+    items.push(keyButton("{ico:backspace}", 10, 4, 2, "ctl~back"));
+    items.push(keyButton("{ico:space-bar} Пробел", 0, 5, 4, "ctl~space"));
+    items.push(keyButton("{ico:clear} Стереть всё", 4, 5, 3, "ctl~clear"));
+    items.push(keyButton("{ico:language} " + (kb.lang === "ru" ? "EN" : "RU"), 7, 5, 2, "ctl~lang"));
+    if (kb.mode === "report") items.push(keyButton("{ico:send} Отправить", 9, 5, 3, "ctl~submit"));
+    else items.push(keyButton("{ico:search} Найти", 9, 5, 3, "ctl~submit"));
     items[0].focus = kb.focusFirst !== false;
+    items = navItems(kb.mode === "search" ? "search" : null).concat(items);
     var shown = kb.text ? kb.text : "{col:msx-white-soft}" + (kb.mode === "report" ? "опишите проблему…" : "название фильма или сериала…");
     return {
         headline: (kb.mode === "report" ? "{ico:edit} " : "{ico:search} ") + shown + "{col:" + ORANGE + "}▏",
@@ -949,20 +983,26 @@ function keyboardPage() {
 
 function keyboardScreen() {
     var pages = [keyboardPage()];
+    var ext = "";
     if (kb.mode === "search") {
-        if (kb.busy) {
-            pages[0].items.push({ type: "space", layout: "0,5,12,1", label: "{col:msx-white-soft}Ищем…" });
-        } else if (kb.results) {
-            if (kb.results.length) pages = pages.concat(posterPages(kb.results, "Найдено: " + kb.results.length));
-            else pages[0].items.push({ type: "space", layout: "0,5,12,1", label: "{col:msx-white-soft}Ничего не найдено" });
+        if (kb.busy) ext = "Ищем…";
+        else if (kb.results) {
+            if (kb.results.length) {
+                ext = "Найдено: " + kb.results.length + " — листайте вниз";
+                for (var i = 0; i < kb.results.length; i += 6) {
+                    pages = pages.concat(posterPages(kb.results.slice(i, i + 6), i === 0 ? "Результаты" : null));
+                }
+            } else ext = "Ничего не найдено";
         }
     } else if (kb.status) {
-        pages[0].items.push({ type: "space", layout: "0,5,12,1", label: kb.status });
+        ext = kb.status;
     }
     return {
         type: "list", flag: "kb", cache: false, important: true,
         headline: kb.mode === "report" ? "Сообщить о проблеме" : "Поиск",
+        extension: ext,
         background: BASE + "img/background.jpg",
+        transparent: 1,
         pages: pages
     };
 }
@@ -1088,8 +1128,8 @@ function KinoHandler() {
         try {
             if (id === "menu") callback(menu());
             else if (id === "home") home(callback);
-            else if (id === "fav") callback(listScreen("Избранное", Store.favorites(), "Здесь пока пусто. Откройте фильм и нажмите «В избранное»."));
-            else if (id === "history") callback(listScreen("История просмотра", Store.history(), "Вы ещё ничего не смотрели."));
+            else if (id === "fav") callback(listScreen("fav", "Избранное", Store.favorites(), "Здесь пока пусто. Откройте фильм и нажмите «В избранное»."));
+            else if (id === "history") callback(listScreen("history", "История просмотра", Store.history(), "Вы ещё ничего не смотрели."));
             else if (id === "search") {
                 if (kb.mode !== "search") {
                     kb.mode = "search";
