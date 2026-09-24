@@ -2,7 +2,7 @@
     "name": "Кинотеатр ЛДС",
     "version": "2.0.0",
     "parameter": "content:{PREFIX}{SERVER}/msx/start.json",
-    "action": "[settings:validate_links:0|link:https://kumero96.github.io/lds-kino/app/]",
+    "action": "settings:validate_links:0",
     "headline": "Кинотеатр ЛДС",
     "launcher": {
         "image": "https://kumero96.github.io/lds-kino/msx/img/launcher.png",
