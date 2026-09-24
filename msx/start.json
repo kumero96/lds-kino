@@ -2,7 +2,7 @@
     "name": "Кинотеатр ЛДС",
     "version": "2.0.0",
     "parameter": "content:{PREFIX}{SERVER}/msx/start.json",
-    "action": "settings:validate_links:0",
+    "action": "[settings:validate_links:0|home]",
     "headline": "Кинотеатр ЛДС",
     "extension": "фильмы и сериалы",
     "launcher": {
