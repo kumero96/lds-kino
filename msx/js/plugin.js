@@ -590,7 +590,7 @@ var FILTERS = [
     { key: "country", title: "Страна", list: COUNTRIES },
     { key: "quality", title: "Качество", list: QUALITIES }
 ];
-var PAGE_SIZE = 48;
+var PAGE_SIZE = 60; // 10 рядов по 6 постеров
 
 function parseCat(id) {
     var t = id.split("~");
@@ -632,13 +632,18 @@ function catalog(id, callback) {
         if (s.offset > 0) {
             var prev = JSON.parse(JSON.stringify(s));
             prev.offset = Math.max(0, s.offset - PAGE_SIZE);
-            items.push({ type: "separate", color: "msx-glass", icon: "arrow-back", iconSize: "large", title: "Назад", action: "replace:content:catalog:" + req(catId(prev)) });
+            items.push({ type: "separate", color: "msx-glass", icon: "arrow-back", iconSize: "large", title: "Предыдущие " + PAGE_SIZE, action: "replace:content:catalog:" + req(catId(prev)) });
         }
-        for (var j = 0; j < movies.length; j++) items.push(posterItem(movies[j]));
+        for (var j = 0; j < movies.length; j++) {
+            var pi = posterItem(movies[j]);
+            // на новой странице фокус сразу на первом фильме, а не в конце списка
+            if (j === 0) pi.focus = true;
+            items.push(pi);
+        }
         if (s.offset + PAGE_SIZE < total) {
             var next = JSON.parse(JSON.stringify(s));
             next.offset = s.offset + PAGE_SIZE;
-            items.push({ type: "separate", color: "msx-glass", icon: "arrow-forward", iconSize: "large", title: "Ещё", action: "replace:content:catalog:" + req(catId(next)) });
+            items.push({ type: "separate", color: "msx-glass", icon: "arrow-forward", iconSize: "large", title: "Следующие " + PAGE_SIZE, action: "replace:content:catalog:" + req(catId(next)) });
         }
         if (!movies.length) {
             items.push({ type: "space", color: "msx-glass", label: "Ничего не найдено — уберите часть фильтров" });
@@ -648,8 +653,8 @@ function catalog(id, callback) {
             type: "list",
             flag: "catalog",
             cache: false,
-            headline: "Каталог",
-            extension: "{ico:local-movies} " + (total ? from + "–" + Math.min(s.offset + PAGE_SIZE, total) + " из " + total : "0"),
+            headline: s.genre ? labelOf(GENRES, s.genre) : "Каталог",
+            extension: total ? "Показаны " + from + "–" + Math.min(s.offset + PAGE_SIZE, total) + " из " + total : "Ничего не найдено",
             background: BASE + "img/background.jpg",
             transparent: 1,
             header: header,
