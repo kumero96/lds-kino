@@ -720,19 +720,18 @@ function movieScreen(id, callback) {
         if (d.directors.length) lines.push("{col:msx-white-soft}Режиссёр: " + d.directors.join(", "));
         if (d.cast.length) lines.push("{col:msx-white-soft}В ролях: " + d.cast.join(", "));
         if (voices.length) lines.push("{col:msx-white-soft}Озвучка: " + voices.join(", "));
-        var text = lines.join("{br}") + "{br}{br}{col:msx-white}" + d.description;
+        var desc = d.description.length > 420 ? d.description.substring(0, 400).replace(/\s+\S*$/, "") + "…" : d.description;
+        var text = lines.join("{br}") + "{br}{br}{col:msx-white}" + desc;
 
         var head = [{
             type: "space", layout: "0,0,3,5", color: "msx-glass", image: d.poster, imageFiller: "cover"
         }, {
-            type: "space", layout: "3,0,9,5", headline: d.name, text: text
+            type: "space", layout: "3,0,9,5", text: text
         }];
         var bi = 0;
         var button = function(icon, label, action, color) {
-            var b = {
-                type: "default", layout: (3 + bi * 3) + ",5,3,1", color: color || "msx-glass",
-                label: "{ico:" + icon + "} " + label, alignment: "center", action: action
-            };
+            var b = { type: "button", layout: (3 + bi * 3) + ",5,3,1", label: label, action: action };
+            if (color) b.color = color;
             bi++;
             head.push(b);
         };
@@ -753,28 +752,26 @@ function movieScreen(id, callback) {
 
         // выбор качества и сезона
         var sel = [];
-        var x = 0;
+        var selRows = 0;
         if (d.groups.length > 1) {
             for (i = 0; i < d.groups.length; i++) {
                 sel.push({
-                    type: "button", layout: x + ",0,2,1",
-                    label: d.groups[i].label + (i === gi ? " ✓" : ""),
-                    color: i === gi ? BLUE : null,
+                    type: "button", layout: (i * 3) + ",0,3,1",
+                    label: (i === gi ? "✓ " : "") + "Качество " + d.groups[i].label,
                     action: "replace:content:movie:" + req("movie~" + movieId + "~" + d.groups[i].key)
                 });
-                x += 2;
             }
+            selRows = 1;
         }
         if (seasons.length > 1) {
-            for (i = 0; i < seasons.length && x < 12; i++) {
+            for (i = 0; i < seasons.length; i++) {
                 sel.push({
-                    type: "button", layout: x + "," + (d.groups.length > 1 ? 0 : 0) + ",2,1",
-                    label: "Сезон " + seasons[i],
-                    color: seasons[i] === season ? BLUE : null,
+                    type: "button", layout: ((i % 6) * 2) + "," + (selRows + Math.floor(i / 6)) + ",2,1",
+                    label: (seasons[i] === season ? "✓ " : "") + "Сезон " + seasons[i],
                     action: "replace:content:movie:" + req("movie~" + movieId + "~" + group.key + "~" + seasons[i])
                 });
-                x += 2;
             }
+            selRows += Math.ceil(seasons.length / 6);
         }
 
         // серии текущего сезона: 4 в ряд
@@ -782,7 +779,7 @@ function movieScreen(id, callback) {
         for (i = 0; i < files.length; i++) if (files[i].season === season || seasons.length <= 1) eps.push(i);
         if (eps.length > 1 || sel.length) {
             var epPage = null;
-            var row = sel.length ? 1 : 0;
+            var row = selRows;
             if (sel.length) {
                 epPage = { headline: eps.length > 1 ? (files[eps[0]].episode > 0 ? "Серии" : "Файлы") : "Качество", items: sel };
                 pages.push(epPage);
