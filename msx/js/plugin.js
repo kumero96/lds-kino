@@ -629,10 +629,10 @@ function catalog(id, callback) {
             action: "replace:content:catalog:" + req("cat~0~~~~~0")
         });
         var items = [];
+        // переход между страницами — в «подвале» под списком, чтобы счётчик MSX считал только фильмы
+        var footer = { items: [] };
         if (s.offset > 0) {
-            var prev = JSON.parse(JSON.stringify(s));
-            prev.offset = Math.max(0, s.offset - PAGE_SIZE);
-            items.push({ type: "separate", enumerate: false, color: "msx-glass", icon: "arrow-back", iconSize: "large", title: "Предыдущие " + PAGE_SIZE, action: "back" });
+            footer.items.push({ type: "button", layout: "0,0,4,1", label: "{ico:arrow-back} Предыдущие " + PAGE_SIZE, action: "back" });
         }
         for (var j = 0; j < movies.length; j++) {
             var pi = posterItem(movies[j]);
@@ -643,7 +643,7 @@ function catalog(id, callback) {
         if (s.offset + PAGE_SIZE < total) {
             var next = JSON.parse(JSON.stringify(s));
             next.offset = s.offset + PAGE_SIZE;
-            items.push({ type: "separate", enumerate: false, color: "msx-glass", icon: "arrow-forward", iconSize: "large", title: "Следующие " + PAGE_SIZE, action: "content:" + req(catId(next)) });
+            footer.items.push({ type: "button", layout: "8,0,4,1", label: "Следующие " + PAGE_SIZE + " {ico:arrow-forward}", action: "content:" + req(catId(next)) });
         }
         if (!movies.length) {
             items.push({ type: "space", color: "msx-glass", label: "Ничего не найдено — уберите часть фильтров" });
@@ -658,8 +658,9 @@ function catalog(id, callback) {
             background: BASE + "img/background.jpg",
             transparent: 1,
             header: header,
+            footer: footer.items.length ? footer : null,
             // MSX переносит позицию фокуса со старой страницы — явно ставим его на первый фильм
-            ready: { action: "focus:index:" + (s.offset > 0 ? 1 : 0) },
+            ready: { action: "focus:index:0" },
             template: { type: "separate", layout: "0,0,2,4", color: "msx-glass", imageFiller: "cover" },
             items: items
         });
