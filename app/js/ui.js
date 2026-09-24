@@ -629,6 +629,12 @@ var Exit = {
         Modal.show(d, null, no);
     },
     now: function() {
+        // открыли из MSX или по ссылке — просто вернуться туда (MSX останется открытым)
+        if (window.history.length > Router.pushed + 1) {
+            window.history.go(-(Router.pushed + 1));
+            return;
+        }
+        // запущено напрямую — закрыть приложение средствами телевизора
         try {
             if (window.tizen) {
                 window.tizen.application.getCurrentApplication().exit();
@@ -641,10 +647,6 @@ var Exit = {
                 return;
             }
         } catch (e) {}
-        // в MSX и обычном браузере — вернуться туда, откуда открыли кинотеатр
-        window.history.go(-(Router.pushed + 1));
-        setTimeout(function() {
-            try { window.close(); } catch (e) {}
-        }, 300);
+        try { window.close(); } catch (e) {}
     }
 };
