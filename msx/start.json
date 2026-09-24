@@ -4,21 +4,45 @@
     "parameter": "content:{PREFIX}{SERVER}/msx/start.json",
     "action": "settings:validate_links:0",
     "headline": "Кинотеатр ЛДС",
+    "extension": "фильмы и сериалы",
     "launcher": {
         "image": "https://kumero96.github.io/lds-kino/msx/img/launcher.png",
         "color": "msx-white"
     },
-    "type": "list",
-    "background": "https://kumero96.github.io/lds-kino/msx/img/background.jpg",
     "pages": [{
         "items": [{
-            "type": "default",
-            "layout": "3,1,6,3",
-            "color": "#F04E23",
+            "type": "space",
+            "layout": "5,0,7,4",
+            "image": "https://kumero96.github.io/lds-kino/msx/img/logo.png",
+            "imageFiller": "fit",
+            "round": false
+        }, {
+            "type": "space",
+            "layout": "5,4,7,2",
+            "text": "Фильмы и сериалы кинотеатра ЛДС: управление пультом, поиск, продолжение просмотра, избранное.{br}{col:msx-white-soft}Работает только при подключении к интернету ЛДС."
+        }, {
+            "type": "control",
+            "layout": "0,0,5,1",
             "focus": true,
-            "headline": "Открыть кинотеатр",
-            "text": "Фильмы и сериалы ЛДС. Работает только при подключении к интернету ЛДС.",
+            "icon": "play-arrow",
+            "label": "Открыть кинотеатр",
             "action": "link:https://kumero96.github.io/lds-kino/app/"
+        }, {
+            "type": "control",
+            "layout": "0,1,5,1",
+            "icon": "info",
+            "label": "Как пользоваться",
+            "action": "panel:data",
+            "data": {
+                "headline": "Как пользоваться",
+                "pages": [{
+                    "items": [{
+                        "type": "space",
+                        "layout": "0,0,8,6",
+                        "text": "{ico:arrow-back} Влево из первого столбца — открыть меню разделов.{br}{br}OK — открыть фильм или серию.{br}{br}Назад — вернуться; на главной — выйти из кинотеатра.{br}{br}В плеере: влево/вправо — перемотка, OK — пауза, вверх/вниз — панель управления."
+                    }]
+                }]
+            }
         }]
     }]
 }
