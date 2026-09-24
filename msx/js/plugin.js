@@ -398,6 +398,15 @@ function posterItem(m, layout) {
 // шапка как в ТВ-приложении: логотип и кнопки разделов (занимает верхний ряд сетки 12×6)
 var NAV = [["home", "home", "Главная"], ["search", "search", "Поиск"], ["fav", "star", "Избранное"], ["cat~0~~~~~0", "tune", "Каталог"], ["history", "history", "История"]];
 
+// эксперимент: кнопки для открытия бокового меню со страниц «вглубь»
+function menuTest() {
+    return [
+        { type: "button", layout: "0,0,3,1", label: "TEST focus:control:menu", action: "focus:control:menu" },
+        { type: "button", layout: "3,0,3,1", label: "TEST home", action: "home" },
+        { type: "button", layout: "6,0,3,1", label: "TEST [back|focus]", action: "[back|focus:control:menu]" }
+    ];
+}
+
 function navItems(active) {
     var items = [{
         type: "space", layout: "0,0,2,1", image: BASE + "img/logo.png", imageFiller: "fit", round: 0
@@ -767,7 +776,7 @@ function movieScreen(id, callback) {
         var desc = d.description.length > 300 ? d.description.substring(0, 280).replace(/\s+\S*$/, "") + "…" : d.description;
         var text = lines.join("{br}") + "{br}{br}{col:msx-white}" + desc;
 
-        var head = navItems(null).concat([{
+        var head = menuTest().concat([{
             type: "space", layout: "0,1,3,5", color: "msx-glass", image: d.poster, imageFiller: "cover"
         }, {
             type: "space", layout: "3,1,9,4", text: text
