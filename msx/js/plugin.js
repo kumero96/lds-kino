@@ -729,8 +729,10 @@ function movieScreen(id, callback) {
         }];
         var bi = 0;
         var button = function(icon, label, action, color) {
-            var b = { type: "button", layout: (3 + bi * 3) + ",5,3,1", icon: icon, label: label, action: action };
-            if (color) b.color = color;
+            var b = {
+                type: "default", layout: (3 + bi * 3) + ",5,3,1", color: color || "msx-glass",
+                label: "{ico:" + icon + "} " + label, alignment: "center", action: action
+            };
             bi++;
             head.push(b);
         };
