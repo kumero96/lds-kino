@@ -92,6 +92,7 @@ var Focus = {
         Focus.cur = e;
         if (!/\bfocus\b/.test(e.className)) e.className += " focus";
         if (!noScroll) Scroll.reveal(e);
+        Lazy.check();
         if (e._onfocus) e._onfocus();
     },
 
@@ -178,6 +179,27 @@ var Focus = {
             return true;
         }
         return false;
+    }
+};
+
+/* ---------- ленивая загрузка постеров ---------- */
+
+var Lazy = {
+    timer: null,
+    check: function() {
+        clearTimeout(Lazy.timer);
+        Lazy.timer = setTimeout(Lazy.run, 60);
+    },
+    run: function() {
+        var list = document.querySelectorAll("#page [data-bg]");
+        var h = window.innerHeight, w = window.innerWidth;
+        for (var i = 0; i < list.length; i++) {
+            var r = list[i].getBoundingClientRect();
+            if (r.top < h * 1.8 && r.bottom > -h * 0.5 && r.left < w * 1.6 && r.right > -w * 0.5) {
+                list[i].style.backgroundImage = "url('" + list[i].getAttribute("data-bg") + "')";
+                list[i].removeAttribute("data-bg");
+            }
+        }
     }
 };
 
@@ -322,6 +344,7 @@ var Router = {
                     target = Focus.byKey(entry.focusKey);
                 }
                 if (!target) target = defaultEl || Focus.first();
+                Lazy.check();
                 if (target) Focus.set(target);
                 else Focus.cur = null;
             }

@@ -22,5 +22,14 @@ window.onerror = function(msg, src, line) {
     Keys.init();
     // Array.indexOf/filter есть во всех браузерах ТВ с 2013 года; на всякий случай проверим
     if (!Array.prototype.filter || !window.localStorage) toast("Браузер устарел: часть функций может не работать");
+    // Samsung (Tizen): медиакнопки пульта нужно явно запросить у системы
+    try {
+        if (window.tizen && window.tizen.tvinputdevice) {
+            var keys = ["MediaPlayPause", "MediaPlay", "MediaPause", "MediaStop", "MediaFastForward", "MediaRewind", "ColorF0Red"];
+            for (var i = 0; i < keys.length; i++) {
+                try { window.tizen.tvinputdevice.registerKey(keys[i]); } catch (e) {}
+            }
+        }
+    } catch (e) {}
     Router.root("home");
 })();

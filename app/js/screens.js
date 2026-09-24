@@ -24,7 +24,8 @@ function openMovie(m) {
 function card(m, key) {
     var c = el("div", "card");
     var img = el("div", "img");
-    if (m.cover) img.style.backgroundImage = "url('" + m.cover + "')";
+    // картинку грузим, только когда карточка рядом с экраном (Lazy.check)
+    if (m.cover) img.setAttribute("data-bg", m.cover);
     else img.appendChild(el("div", "noimg", escHtml(m.name)));
     if (m.rating) img.appendChild(el("div", "badge rating", escHtml(m.rating)));
     if (newEpisodes[m.id] > 0) img.appendChild(el("div", "badge new", newEpisodes[m.id] === 1 ? "Новая серия" : "+" + newEpisodes[m.id] + " серий"));
@@ -272,6 +273,7 @@ Screens.catalog = function(params, ctx) {
                 g.appendChild(c);
             }
             state.offset += list.length;
+            Lazy.check();
             if (!list.length || state.offset >= state.total) state.done = true;
             info.innerHTML = state.total ? "Найдено: " + state.total : "";
             if (!state.total) status.appendChild(el("div", "message", "Ничего не найдено — попробуйте убрать часть фильтров"));
@@ -398,6 +400,7 @@ Screens.search = function(p, ctx) {
                 grid(results, searchState.results, "found");
             } else results.appendChild(el("div", "message", "Ничего не найдено"));
         }
+        Lazy.check();
     };
     var run = function() {
         var q = searchState.text.replace(/^\s+|\s+$/g, "");
