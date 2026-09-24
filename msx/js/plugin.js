@@ -637,7 +637,10 @@ function catalog(id, callback) {
         for (var j = 0; j < movies.length; j++) {
             var pi = posterItem(movies[j]);
             // на новой странице фокус сразу на первом фильме, а не в конце списка
-            if (j === 0) pi.focus = true;
+            if (j === 0) {
+                pi.focus = true;
+                pi.id = "first";
+            }
             items.push(pi);
         }
         if (s.offset + PAGE_SIZE < total) {
@@ -660,8 +663,8 @@ function catalog(id, callback) {
             header: header,
             footer: footer.items.length ? footer : null,
             // MSX переносит позицию фокуса со старой страницы — явно ставим его на первый фильм
-            // номер считается вместе с кнопками шапки — пропускаем их
-            ready: { action: "focus:index:" + header.items.length },
+            // по умолчанию MSX ставит фокус на кнопку шапки — переводим на первый фильм
+            ready: movies.length ? { action: "focus:first" } : null,
             template: { type: "separate", layout: "0,0,2,4", color: "msx-glass", imageFiller: "cover" },
             items: items
         });
