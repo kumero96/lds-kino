@@ -395,31 +395,13 @@ function posterItem(m, layout) {
     return item;
 }
 
-// шапка как в ТВ-приложении: логотип и кнопки разделов (занимает верхний ряд сетки 12×6)
-var NAV = [["home", "home", "Главная"], ["search", "search", "Поиск"], ["fav", "star", "Избранное"], ["cat~0~~~~~0", "tune", "Каталог"], ["history", "history", "История"]];
-
-// эксперимент: кнопки для открытия бокового меню со страниц «вглубь»
-function menuTest() {
-    return [
-        { type: "button", layout: "0,0,3,1", label: "TEST focus:control:menu", action: "focus:control:menu" },
-        { type: "button", layout: "3,0,3,1", label: "TEST home", action: "home" },
-        { type: "button", layout: "6,0,3,1", label: "TEST [back|focus]", action: "[back|focus:control:menu]" }
-    ];
-}
-
-function navItems(active) {
-    var items = [{
-        type: "space", layout: "0,0,2,1", image: BASE + "img/logo.png", imageFiller: "fit", round: 0
-    }];
-    for (var i = 0; i < NAV.length; i++) {
-        items.push({
-            type: "button", enumerate: false, layout: (2 + i * 2) + ",0,2,1",
-            label: "{ico:" + NAV[i][1] + "} " + NAV[i][2],
-            color: NAV[i][0] === active ? BLUE : null,
-            action: NAV[i][0] === active ? "reload:content" : "content:" + req(NAV[i][0])
-        });
-    }
-    return items;
+// На внутренних страницах (открытых «вглубь») MSX не открывает боковое меню стрелкой влево,
+// поэтому там есть кнопка «Меню»: возвращает на главный экран и открывает боковое меню.
+function menuButton() {
+    return {
+        type: "button", enumerate: false, layout: "0,0,2,1",
+        label: "{ico:menu} Меню", action: "[home|focus:control:menu]"
+    };
 }
 
 function allTile(layout, action) {
@@ -427,16 +409,16 @@ function allTile(layout, action) {
 }
 
 // ряд постеров: 6 штук (или 5 + «Все»), высота 4 клетки — пропорции настоящего постера
-function posterPages(movies, headline, moreAction, withNav) {
+function posterPages(movies, headline, moreAction, withMenu) {
     var pages = [];
     var page = null;
-    var y = withNav ? 1 : 0;
+    var y = withMenu ? 1 : 0;
     var perPage = 6;
     var list = moreAction && movies.length >= perPage ? movies.slice(0, perPage - 1) : movies;
     for (var i = 0; i < list.length; i++) {
         var slot = i % perPage;
         if (slot === 0) {
-            page = { headline: pages.length === 0 ? headline : null, items: pages.length === 0 && withNav ? navItems(withNav) : [] };
+            page = { headline: pages.length === 0 ? headline : null, items: pages.length === 0 && withMenu ? [menuButton()] : [] };
             pages.push(page);
         }
         page.items.push(posterItem(list[i], slot * 2 + "," + (pages.length === 1 ? y : 0) + ",2,4"));
@@ -535,10 +517,10 @@ function home(callback) {
         if (--left > 0) return;
         var pages = [];
         var add = function(list, title, more) {
-            pages = pages.concat(posterPages(list, title, more, pages.length === 0 ? "home" : null));
+            pages = pages.concat(posterPages(list, title, more));
         };
         var hist = Store.history();
-        if (hist.length) add(hist, "Продолжить просмотр", hist.length > 6 ? "content:" + req("history") : null);
+        if (hist.length) add(hist, "Продолжить просмотр", hist.length > 6 ? "content:" + req("history~p") : null);
         var favs = Store.favorites();
         var withNew = [];
         for (var f = 0; f < favs.length; f++) if (newEpisodes[favs[f].id] > 0) withNew.push(favs[f]);
@@ -546,7 +528,7 @@ function home(callback) {
         for (var i = 0; i < HOME_ROWS.length; i++) {
             if (results[i] && results[i].length) {
                 var row = HOME_ROWS[i];
-                add(results[i], row.title, row.id ? "content:" + req(row.id) : null);
+                add(results[i], row.title, row.id ? "content:" + req(row.id + "~p") : null);
             }
         }
         if (!pages.length) callback(errorContent(failed || "Пустой ответ", "home"));
@@ -603,11 +585,11 @@ var PAGE_SIZE = 60; // 10 рядов по 6 постеров
 
 function parseCat(id) {
     var t = id.split("~");
-    return { order: t[1] || "0", genre: t[2] || "", year: t[3] || "", country: t[4] || "", quality: t[5] || "", offset: parseInt(t[6], 10) || 0 };
+    return { order: t[1] || "0", genre: t[2] || "", year: t[3] || "", country: t[4] || "", quality: t[5] || "", offset: parseInt(t[6], 10) || 0, pushed: t[7] === "p" };
 }
 
 function catId(s) {
-    return "cat~" + s.order + "~" + s.genre + "~" + s.year + "~" + s.country + "~" + s.quality + "~" + s.offset;
+    return "cat~" + s.order + "~" + s.genre + "~" + s.year + "~" + s.country + "~" + s.quality + "~" + s.offset + (s.pushed ? "~p" : "");
 }
 
 function labelOf(list, v) {
@@ -623,19 +605,20 @@ function catalog(id, callback) {
         var total = parseInt(r.total, 10) || 0;
         var movies = parseMovies(r.movies);
         // кнопки фильтров — открывают панель выбора
-        var header = { items: navItems(id === "cat~0~~~~~0" ? "cat~0~~~~~0" : null) };
+        var header = { items: s.pushed ? [menuButton()] : [] };
+        var fy = s.pushed ? 1 : 0;
         for (var i = 0; i < FILTERS.length; i++) {
             var f = FILTERS[i];
             var val = labelOf(f.list, s[f.key]);
             header.items.push({
-                type: "button", layout: (i * 2) + ",1,2,1",
+                type: "button", layout: (i * 2) + "," + fy + ",2,1",
                 label: "{ico:" + f.icon + "} " + val,
                 action: "panel:" + req("pick~" + f.key + "~" + catId(s))
             });
         }
         header.items.push({
-            type: "button", layout: "10,1,2,1", label: "{ico:filter-alt-off} Сброс",
-            action: "replace:content:catalog:" + req("cat~0~~~~~0")
+            type: "button", layout: "10," + fy + ",2,1", label: "{ico:filter-alt-off} Сброс",
+            action: "replace:content:catalog:" + req("cat~0~~~~~0" + (s.pushed ? "~p" : ""))
         });
         var items = [];
         // переход между страницами — в «подвале» под списком, чтобы счётчик MSX считал только фильмы
@@ -655,6 +638,7 @@ function catalog(id, callback) {
         if (s.offset + PAGE_SIZE < total) {
             var next = JSON.parse(JSON.stringify(s));
             next.offset = s.offset + PAGE_SIZE;
+            next.pushed = true;
             footer.items.push({ type: "button", layout: "8,0,4,1", label: "Следующие " + PAGE_SIZE + " {ico:arrow-forward}", action: "content:" + req(catId(next)) });
         }
         if (!movies.length) {
@@ -712,10 +696,10 @@ function picker(id, callback) {
 
 /* ---------- избранное и история ---------- */
 
-function listScreen(active, headline, movies, emptyText) {
+function listScreen(pushed, headline, movies, emptyText) {
     if (!movies.length) {
-        var items0 = navItems(active);
-        items0.push({ type: "space", layout: "0,1,12,2", color: "msx-glass", headline: headline, text: emptyText });
+        var items0 = pushed ? [menuButton()] : [];
+        items0.push({ type: "space", layout: "0," + (pushed ? 1 : 0) + ",12,2", color: "msx-glass", headline: headline, text: emptyText });
         return content(headline, [{ items: items0 }]);
     }
     var items = [];
@@ -724,7 +708,7 @@ function listScreen(active, headline, movies, emptyText) {
         type: "list", cache: false, headline: headline,
         background: BASE + "img/background.jpg",
         transparent: 1,
-        header: { items: navItems(active) },
+        header: pushed ? { items: [menuButton()] } : null,
         template: { type: "separate", layout: "0,0,2,4", color: "msx-glass", imageFiller: "cover" },
         items: items
     };
@@ -776,7 +760,7 @@ function movieScreen(id, callback) {
         var desc = d.description.length > 300 ? d.description.substring(0, 280).replace(/\s+\S*$/, "") + "…" : d.description;
         var text = lines.join("{br}") + "{br}{br}{col:msx-white}" + desc;
 
-        var head = menuTest().concat([{
+        var head = [menuButton()].concat([{
             type: "space", layout: "0,1,3,5", color: "msx-glass", image: d.poster, imageFiller: "cover"
         }, {
             type: "space", layout: "3,1,9,4", text: text
@@ -997,7 +981,7 @@ function keyboardPage() {
     if (kb.mode === "report") items.push(keyButton("{ico:send} Отправить", 9, 5, 3, "ctl~submit"));
     else items.push(keyButton("{ico:search} Найти", 9, 5, 3, "ctl~submit"));
     items[0].focus = kb.focusFirst !== false;
-    items = navItems(kb.mode === "search" ? "search" : null).concat(items);
+    if (kb.mode === "report") items.unshift(menuButton());
     var shown = kb.text ? kb.text : "{col:msx-white-soft}" + (kb.mode === "report" ? "опишите проблему…" : "название фильма или сериала…");
     return {
         headline: (kb.mode === "report" ? "{ico:edit} " : "{ico:search} ") + shown + "{col:" + ORANGE + "}▏",
@@ -1157,8 +1141,8 @@ function KinoHandler() {
         try {
             if (id === "menu") callback(menu());
             else if (id === "home") home(callback);
-            else if (id === "fav") callback(listScreen("fav", "Избранное", Store.favorites(), "Здесь пока пусто. Откройте фильм и нажмите «В избранное»."));
-            else if (id === "history") callback(listScreen("history", "История просмотра", Store.history(), "Вы ещё ничего не смотрели."));
+            else if (id === "fav") callback(listScreen(false, "Избранное", Store.favorites(), "Здесь пока пусто. Откройте фильм и нажмите «В избранное»."));
+            else if (id === "history" || id === "history~p") callback(listScreen(id === "history~p", "История просмотра", Store.history(), "Вы ещё ничего не смотрели."));
             else if (id === "search") {
                 if (kb.mode !== "search") {
                     kb.mode = "search";
