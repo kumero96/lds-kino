@@ -1,10 +1,24 @@
 {
     "name": "Кинотеатр ЛДС",
-    "version": "1.0.0",
-    "parameter": "menu:request:interaction:menu@{PREFIX}{SERVER}/msx/plugin.html?v=14",
-    "welcome": "none",
+    "version": "2.0.0",
+    "parameter": "content:{PREFIX}{SERVER}/msx/start.json",
+    "action": "[settings:validate_links:0|link:https://kumero96.github.io/lds-kino/app/]",
+    "headline": "Кинотеатр ЛДС",
     "launcher": {
         "image": "https://kumero96.github.io/lds-kino/msx/img/launcher.png",
         "color": "msx-white"
-    }
+    },
+    "type": "list",
+    "background": "https://kumero96.github.io/lds-kino/msx/img/background.jpg",
+    "pages": [{
+        "items": [{
+            "type": "default",
+            "layout": "3,1,6,3",
+            "color": "#F04E23",
+            "focus": true,
+            "headline": "Открыть кинотеатр",
+            "text": "Фильмы и сериалы ЛДС. Работает только при подключении к интернету ЛДС.",
+            "action": "link:https://kumero96.github.io/lds-kino/app/"
+        }]
+    }]
 }

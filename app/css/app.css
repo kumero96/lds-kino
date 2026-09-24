@@ -1,0 +1,388 @@
+/* Кинотеатр ЛДС — веб-версия для телевизоров (открывается из MSX или в любом браузере).
+   Размеры в rem: 1rem = 1/96 ширины экрана, поэтому интерфейс одинаков на 720p, 1080p и 4K. */
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #06111D;
+    color: #FFFFFF;
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
+body::before {
+    /* фирменный фон: синее и оранжевое свечение */
+    content: "";
+    position: fixed;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background:
+        radial-gradient(60rem 40rem at 0% 0%, rgba(24, 128, 208, 0.32), transparent 70%),
+        radial-gradient(50rem 35rem at 100% 100%, rgba(240, 78, 35, 0.16), transparent 70%),
+        #06111D;
+    z-index: -2;
+}
+
+#backdrop {
+    position: fixed;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    filter: blur(2.5rem) saturate(1.2);
+    transform: scale(1.1);
+    transition: opacity 0.6s;
+    z-index: -1;
+}
+#backdrop.on { opacity: 0.22; }
+
+/* ---------- шапка ---------- */
+
+#top {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 5.5rem;
+    display: flex;
+    align-items: center;
+    padding: 0 3rem;
+    z-index: 20;
+    background: linear-gradient(to bottom, rgba(6, 17, 29, 0.98) 72%, rgba(6, 17, 29, 0));
+}
+#top .logo { height: 2.8rem; margin: 0 0.6rem; }
+#top .title { font-size: 1.7rem; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.icon-btn {
+    width: 3.4rem; height: 3.4rem;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.7rem;
+    color: #FFFFFF;
+    background: transparent;
+}
+.icon-btn svg { width: 1.8rem; height: 1.8rem; fill: currentColor; }
+.icon-btn.focus { background: #fff; color: #06111D; }
+
+/* ---------- боковое меню ---------- */
+
+#menu {
+    position: fixed;
+    top: 0; bottom: 0; left: 0;
+    width: 22rem;
+    padding: 6.5rem 1.2rem 2rem;
+    background: rgba(6, 17, 29, 0.97);
+    border-right: 1px solid rgba(79, 170, 240, 0.25);
+    transform: translateX(-100%);
+    transition: transform 0.25s;
+    z-index: 30;
+    overflow: hidden;
+}
+#menu.open { transform: none; }
+#menu .sep { color: #8DACC7; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1rem; margin: 1.2rem 1.2rem 0.4rem; }
+.menu-item {
+    display: flex; align-items: center;
+    padding: 0.85rem 1.2rem;
+    border-radius: 0.9rem;
+    font-size: 1.45rem;
+    color: #DCE6F0;
+}
+.menu-item svg { width: 1.6rem; height: 1.6rem; fill: currentColor; flex: none; }
+.menu-item.active { color: #4FAAF0; }
+.menu-item.focus { background: #fff; color: #06111D; }
+#menu-shade {
+    position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0, 0, 0, 0.45);
+    opacity: 0; pointer-events: none; transition: opacity 0.25s; z-index: 25;
+}
+#menu-shade.on { opacity: 1; }
+
+/* ---------- страницы ---------- */
+
+#page {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+}
+.scroll {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 6rem 0 6rem;
+    transition: transform 0.25s ease-out;
+}
+
+.row { margin-bottom: 1.8rem; }
+.row-head {
+    display: flex; align-items: center;
+    padding: 0 3rem;
+    margin-bottom: 0.8rem;
+}
+.row-head h2 { font-size: 1.7rem; margin: 0; font-weight: 600; }
+.pill {
+    display: inline-flex; align-items: center;
+    padding: 0.55rem 1.3rem;
+    border-radius: 3rem;
+    background: rgba(16, 34, 58, 0.9);
+    font-size: 1.2rem;
+    color: #fff;
+    white-space: nowrap;
+}
+.pill.small { padding: 0.35rem 1rem; font-size: 1.05rem; }
+.pill.sel { background: #1880D0; }
+.pill.primary { background: #F04E23; }
+.pill.focus { background: #fff; color: #06111D; }
+.pill.primary.focus { background: #FF6A3D; box-shadow: 0 0 0 0.25rem #fff; color: #fff; }
+.pill.sel.focus { background: #3A9BE8; box-shadow: 0 0 0 0.25rem #fff; color: #fff; }
+.pill svg { width: 1.3rem; height: 1.3rem; fill: currentColor; margin-right: 0.5rem; flex: none; }
+.pill .after svg { margin: 0 0 0 0.4rem; }
+
+.row-items {
+    display: flex;
+    padding: 0.6rem 3rem 0.4rem;
+    overflow: hidden;
+    scroll-behavior: auto;
+}
+
+/* ---------- постер ---------- */
+
+.card { width: 11.5rem; flex: none; }
+.card .img {
+    position: relative;
+    width: 100%;
+    padding-top: 148%;
+    border-radius: 1rem;
+    background: #10223A center / cover no-repeat;
+    box-shadow: 0 0 0 0 transparent;
+    transition: transform 0.15s, box-shadow 0.15s;
+    overflow: hidden;
+}
+.card.focus .img { transform: scale(1.06); box-shadow: 0 0 0 0.3rem #fff, 0 0 2rem rgba(24, 128, 208, 0.7); }
+.card .name { margin-top: 0.7rem; font-size: 1.15rem; line-height: 1.35; max-height: 2.7em; overflow: hidden; }
+.card .year { color: #8DACC7; font-size: 1rem; margin-top: 0.15rem; }
+.card .noimg { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; color: #8DACC7; font-size: 1.1rem; }
+.badge {
+    position: absolute;
+    padding: 0.2rem 0.55rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+}
+.badge.rating { top: 0.6rem; left: 0.6rem; background: rgba(24, 128, 208, 0.92); }
+.badge.new { top: 0.6rem; right: 0.6rem; background: #F04E23; }
+.badge.watched { bottom: 1rem; left: 0.6rem; background: #3FB950; }
+.badge.count { bottom: 1rem; left: 0.6rem; background: rgba(6, 17, 29, 0.85); }
+.progress { position: absolute; left: 0; right: 0; bottom: 0; height: 0.45rem; background: rgba(255, 255, 255, 0.55); }
+.progress i { display: block; height: 100%; background: #F04E23; }
+.progress i.done { background: #3FB950; }
+
+.more-card .img { display: flex; }
+.more-card .img b { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; font-size: 4rem; color: #fff; }
+
+.grid {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0.6rem 3rem;
+}
+.grid .card { width: calc((100% - 5 * 1.55rem) / 6); }
+
+.filters { display: flex; flex-wrap: wrap; padding: 0 3rem 1.2rem; }
+.hint { color: #8DACC7; font-size: 1.15rem; padding: 0 3rem 1rem; }
+
+.message { text-align: center; padding: 6rem 3rem; color: #8DACC7; font-size: 1.4rem; line-height: 1.6; }
+.message .pill { margin-top: 1.5rem; }
+.spinner {
+    width: 3.5rem; height: 3.5rem; margin: 0 auto 1rem;
+    border: 0.35rem solid rgba(255, 255, 255, 0.2); border-top-color: #4FAAF0;
+    border-radius: 50%; animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- страница фильма ---------- */
+
+.details { display: flex; padding: 1rem 3rem 1rem; }
+.details .poster {
+    width: 19rem; height: 28rem; flex: none;
+    border-radius: 1.2rem; background: #10223A center / cover no-repeat;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+}
+.details .info { flex: 1; min-width: 0; }
+.details h1 { font-size: 3rem; margin: 0 0 0.4rem; line-height: 1.15; }
+.details .sub { color: #8DACC7; font-size: 1.3rem; margin-bottom: 0.4rem; }
+.details .ratings { display: flex; margin: 0.8rem 0; }
+.chip { border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 0.5rem; padding: 0.2rem 0.7rem; font-size: 1.1rem; }
+.chip b { color: #4FAAF0; margin-right: 0.3rem; }
+.details .line { color: #8DACC7; font-size: 1.15rem; margin: 0.2rem 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.details .desc { font-size: 1.25rem; line-height: 1.55; color: #D8E1EA; margin: 1rem 0 0; max-height: 7.8em; overflow: hidden; }
+.actions { display: flex; flex-wrap: wrap; margin-top: 1.5rem; }
+.actions .pill { font-size: 1.3rem; padding: 0.8rem 1.6rem; }
+
+.section { padding: 0 3rem; margin: 1.5rem 0 0.5rem; }
+.section h2 { font-size: 1.6rem; margin: 0 0 0.8rem; font-weight: 600; }
+.tabs { display: flex; flex-wrap: wrap; }
+
+.episodes { display: flex; flex-wrap: wrap; padding: 0.4rem 3rem; }
+.ep {
+    position: relative;
+    width: calc((100% - 4 * 1rem) / 5);
+    padding: 0.9rem 1.1rem 1.1rem;
+    border-radius: 0.9rem;
+    background: rgba(16, 34, 58, 0.9);
+    overflow: hidden;
+}
+.ep .t { font-size: 1.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ep .m { color: #8DACC7; font-size: 1rem; margin-top: 0.2rem; }
+.ep.last { box-shadow: inset 0 0 0 0.15rem #F04E23; }
+.ep.watched .t { color: #3FB950; }
+.ep.focus { background: #17345A; box-shadow: 0 0 0 0.25rem #fff; }
+
+/* ---------- окна ---------- */
+
+#modal {
+    position: fixed; top: 0; right: 0; bottom: 0; left: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none; align-items: center; justify-content: center;
+    z-index: 70;
+}
+#modal.on { display: flex; }
+.dialog {
+    width: 52rem; max-height: 90vh; overflow: hidden;
+    background: #0B1A2C;
+    border: 1px solid rgba(24, 128, 208, 0.5);
+    border-radius: 1.4rem;
+    padding: 2.2rem 2.5rem;
+}
+.dialog h3 { margin: 0 0 0.3rem; font-size: 2rem; }
+.dialog .sub { color: #4FAAF0; font-size: 1.2rem; margin-bottom: 1.2rem; }
+.dialog p { color: #D8E1EA; font-size: 1.2rem; line-height: 1.6; margin: 0.6rem 0; }
+.dialog .list { display: flex; flex-direction: column; max-height: 55vh; overflow: hidden; }
+.dialog .opt { padding: 0.75rem 1.2rem; border-radius: 0.8rem; font-size: 1.3rem; background: rgba(16, 34, 58, 0.9); }
+.dialog .opt.sel { color: #4FAAF0; }
+.dialog .opt.focus { background: #fff; color: #06111D; }
+.dialog .buttons { display: flex; margin-top: 1.5rem; flex-wrap: wrap; }
+.dialog .warn { color: #F04E23; }
+
+/* ---------- клавиатура ---------- */
+
+.input {
+    margin: 0 3rem 1.2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 1rem;
+    background: #10223A;
+    font-size: 1.7rem;
+    min-height: 3.8rem;
+    box-shadow: inset 0 0 0 0.15rem rgba(79, 170, 240, 0.5);
+}
+.input .ph { color: #8DACC7; }
+.input .caret { display: inline-block; width: 0.12rem; height: 1.6rem; background: #F04E23; vertical-align: middle; margin-left: 0.15rem; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.kb { padding: 0 3rem; }
+.kb-row { display: flex; margin-bottom: 0.6rem; }
+.key {
+    flex: 1; min-width: 0;
+    height: 3.6rem;
+    border-radius: 0.7rem;
+    background: rgba(16, 34, 58, 0.9);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.45rem;
+}
+.key.w2 { flex: 2; } .key.w3 { flex: 3; } .key.w4 { flex: 4; }
+.key.accent { background: #1880D0; }
+.key.focus { background: #fff; color: #06111D; }
+.dialog .input { margin: 0.8rem 0; font-size: 1.4rem; min-height: 3rem; }
+.dialog .kb { padding: 0; }
+.dialog .key { height: 3rem; font-size: 1.25rem; }
+
+/* ---------- плеер ---------- */
+
+#player {
+    position: fixed; top: 0; right: 0; bottom: 0; left: 0;
+    background: #000;
+    display: none;
+    z-index: 50;
+}
+#player.on { display: block; }
+#player video { width: 100%; height: 100%; background: #000; }
+#player .ui { position: absolute; top: 0; right: 0; bottom: 0; left: 0; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+#player.show .ui { opacity: 1; }
+#player .ptop {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 2.5rem 3rem 5rem;
+    font-size: 1.8rem;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+}
+#player .pbottom {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 5rem 3rem 2.5rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+}
+#player .bar { position: relative; height: 0.5rem; background: rgba(255, 255, 255, 0.25); border-radius: 0.3rem; }
+#player .bar .buf { position: absolute; left: 0; top: 0; bottom: 0; background: rgba(79, 170, 240, 0.45); border-radius: 0.3rem; }
+#player .bar .pos { position: absolute; left: 0; top: 0; bottom: 0; background: #F04E23; border-radius: 0.3rem; }
+#player .bar .dot { position: absolute; top: 50%; width: 1.3rem; height: 1.3rem; margin: -0.65rem 0 0 -0.65rem; border-radius: 50%; background: #F04E23; }
+#player .times { display: flex; justify-content: space-between; font-size: 1.2rem; color: #DDE; margin-top: 0.7rem; }
+#player .pbtns { display: flex; margin-top: 1.2rem; align-items: center; pointer-events: auto; }
+#player .pbtns .pill { font-size: 1.25rem; }
+#player .osd {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1rem 2rem; border-radius: 1rem;
+    background: rgba(0, 0, 0, 0.7);
+    font-size: 2rem; display: none;
+}
+#player .osd.on { display: block; }
+#player .next {
+    position: absolute; right: 3rem; bottom: 12rem;
+    padding: 1.5rem 2rem; border-radius: 1.2rem;
+    background: rgba(11, 26, 44, 0.95);
+    border: 1px solid rgba(24, 128, 208, 0.6);
+    font-size: 1.4rem; display: none; pointer-events: auto;
+}
+#player .next.on { display: block; }
+#player .next .buttons { display: flex; margin-top: 1rem; }
+#player .busy { position: absolute; top: 50%; left: 50%; margin: -1.75rem 0 0 -1.75rem; display: none; }
+#player .busy.on { display: block; }
+
+#toast {
+    position: fixed; left: 50%; bottom: 3rem;
+    transform: translateX(-50%) translateY(8rem);
+    padding: 1rem 2rem; border-radius: 3rem;
+    background: rgba(11, 26, 44, 0.95);
+    border: 1px solid rgba(79, 170, 240, 0.5);
+    font-size: 1.3rem;
+    transition: transform 0.3s;
+    z-index: 80;
+}
+#toast.on { transform: translateX(-50%) translateY(0); }
+
+/* ---------- телефоны ---------- */
+html.phone .grid .card { width: calc((100% - 2 * 1.55rem) / 3); }
+html.phone .card { width: 16rem; }
+html.phone .details { flex-direction: column; }
+html.phone .ep { width: calc((100% - 1rem) / 2); }
+
+/* отступы вместо flex gap (старые браузеры ТВ его не знают) */
+#top > * + * { margin-left: 1rem; }
+.menu-item > * + * { margin-left: 1.2rem; }
+.row-head > * + * { margin-left: 1.2rem; }
+.pill > * + * { margin-left: 0.6rem; }
+.row-items > * + * { margin-left: 1.4rem; }
+.details > * + * { margin-left: 3rem; }
+.details .ratings > * + * { margin-left: 0.8rem; }
+.actions > * { margin: 0 0.9rem 0.9rem 0; }
+.tabs > * { margin: 0 0.8rem 0.8rem 0; }
+.filters > * { margin: 0 0.8rem 0.8rem 0; }
+.dialog .list > * + * { margin-top: 0.5rem; }
+.dialog .buttons > * { margin: 0 1rem 1rem 0; }
+.kb-row > * + * { margin-left: 0.6rem; }
+#player .pbtns > * + * { margin-left: 0.9rem; }
+#player .next .buttons > * + * { margin-left: 0.8rem; }
+.grid .card { margin: 0 1.55rem 2rem 0; }
+.grid .card:nth-child(6n) { margin-right: 0; }
+.episodes .ep { margin: 0 1rem 1rem 0; }
+.episodes .ep:nth-child(5n) { margin-right: 0; }
+html.phone .grid .card:nth-child(6n) { margin-right: 1.55rem; }
+html.phone .grid .card:nth-child(3n) { margin-right: 0; }
+html.phone .episodes .ep:nth-child(5n) { margin-right: 1rem; }
+html.phone .episodes .ep:nth-child(2n) { margin-right: 0; }

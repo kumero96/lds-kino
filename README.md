@@ -1,14 +1,9 @@
-# Кинотеатр ЛДС для Media Station X
+# Кинотеатр ЛДС — версия для телевизоров
 
-Неофициальный плагин для [Media Station X](https://msx.benzac.de/) — удобный просмотр каталога
-кинотеатра ЛДС (cinema.ntop.tv) на телевизорах Samsung, LG, Android TV и других.
+Неофициальный удобный интерфейс для кинотеатра ЛДС (cinema.ntop.tv): управление пультом,
+ряды постеров, поиск с русской клавиатурой, продолжение просмотра, отметки серий, избранное.
 Работает только при подключении к интернету ЛДС.
 
-## Как подключить на телевизоре
-
-1. Установите приложение **Media Station X** из магазина приложений телевизора.
-2. Откройте его: **Settings → Start Parameter → Setup**.
-3. Введите адрес: `kumero96.github.io/lds-kino` и подтвердите.
-
-Попробовать в браузере на компьютере:
-https://msx.benzac.de/?start=menu:request:interaction:menu@https://kumero96.github.io/lds-kino/msx/plugin.html?v=14
+- Открыть в браузере (ТВ, телефон, компьютер): https://kumero96.github.io/lds-kino/app/
+- Телевизоры Samsung, LG и другие — через приложение **Media Station X**:
+  Settings → Start Parameter → Setup → адрес `kumero96.github.io/lds-kino`
