@@ -888,7 +888,10 @@ function playlist(id, callback) {
             var props = {
                 "resume:key": "url",
                 "trigger:start": msg + "start~" + ctx,
-                "trigger:complete": msg + "prog~" + ctx + "~100"
+                // «end», а не «complete»: complete у MSX включает следующую серию, его не трогаем
+                "trigger:end": msg + "prog~" + ctx + "~100",
+                // «Назад» из плеера — закрыть видео (иначе оно играет под страницей) и обновить страницу фильма
+                "trigger:back": "[player:eject|" + msg + "back~" + movieId + "]"
             };
             for (var pct = 10; pct <= 90; pct += 10) props["trigger:" + pct + "%"] = msg + "prog~" + ctx + "~" + pct;
             items.push({
@@ -1119,6 +1122,11 @@ function handleMessage(message) {
             Store.addHistory({ id: dd.id, name: dd.name, year: dd.year, cover: dd.poster }, group, file, title);
         }
         if (t[0] === "prog") Store.setProgress(id, file, parseInt(t[4], 10) / 100);
+    } else if (t[0] === "back") {
+        // вернулись из плеера — перерисовать страницу, чтобы появилось «Продолжить» и отметки серий
+        setTimeout(function() {
+            TVXInteractionPlugin.executeAction("replace:content:movie:" + req("movie~" + t[1]));
+        }, 300);
     } else if (t[0] === "send") {
         sendReport(t[1], t[2], t[3], PROBLEMS[parseInt(t[4], 10)], function(ok, e) {
             TVXInteractionPlugin.executeAction(ok ? "[back|success:Спасибо! Сообщение отправлено в ЛДС]" : "error:Не удалось отправить: " + e);
