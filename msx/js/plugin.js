@@ -568,7 +568,7 @@ function home(callback) {
 
 /* ---------- каталог с фильтрами ---------- */
 
-var SORTS = [["0", "Новые поступления"], ["1", "По году"], ["8", "Популярное"], ["6", "Хиты"], ["9", "Рейтинг КиноПоиска"], ["2", "Рейтинг IMDb"]];
+var SORTS = [["0", "Новые"], ["1", "По году"], ["8", "Популярное"], ["6", "Хиты"], ["9", "КиноПоиск"], ["2", "IMDb"]];
 var GENRES = [["", "Все"], ["!34", "Фильмы"], ["34", "Сериалы"], ["4", "Комедии"], ["6", "Боевики"], ["2", "Драмы"],
     ["5", "Фантастика"], ["10", "Фэнтези"], ["7", "Ужасы"], ["3", "Триллеры"], ["33", "Детективы"], ["1", "Криминал"],
     ["12", "Приключения"], ["17", "Мелодрамы"], ["13", "Мультфильмы"], ["25", "Аниме"], ["15", "Семейные"],
@@ -584,11 +584,11 @@ var COUNTRIES = [["", "Любая"], ["7", "Россия"], ["4", "СССР"], [
     ["330", "Южная Корея"], ["11", "Китай"], ["106", "Индия"], ["39", "Турция"], ["32", "Украина"], ["61", "Беларусь"]];
 var QUALITIES = [["", "Любое"], ["4", "4K"], ["3", "1080p"], ["2", "720p"], ["1", "SD"]];
 var FILTERS = [
-    { key: "order", title: "Сортировка", list: SORTS },
-    { key: "genre", title: "Жанр", list: GENRES },
-    { key: "year", title: "Год", list: YEARS },
-    { key: "country", title: "Страна", list: COUNTRIES },
-    { key: "quality", title: "Качество", list: QUALITIES }
+    { key: "order", title: "Сортировка", icon: "sort", list: SORTS },
+    { key: "genre", title: "Жанр", icon: "theater-comedy", list: GENRES },
+    { key: "year", title: "Год", icon: "event", list: YEARS },
+    { key: "country", title: "Страна", icon: "public", list: COUNTRIES },
+    { key: "quality", title: "Качество", icon: "hd", list: QUALITIES }
 ];
 var PAGE_SIZE = 60; // 10 рядов по 6 постеров
 
@@ -620,7 +620,7 @@ function catalog(id, callback) {
             var val = labelOf(f.list, s[f.key]);
             header.items.push({
                 type: "button", layout: (i * 2) + ",1,2,1",
-                label: "{txt:msx-white-soft:" + f.title + ":} " + val,
+                label: "{ico:" + f.icon + "} " + val,
                 action: "panel:" + req("pick~" + f.key + "~" + catId(s))
             });
         }
@@ -658,6 +658,8 @@ function catalog(id, callback) {
             background: BASE + "img/background.jpg",
             transparent: 1,
             header: header,
+            // MSX переносит позицию фокуса со старой страницы — явно ставим его на первый фильм
+            ready: { action: "focus:index:" + (s.offset > 0 ? 1 : 0) },
             template: { type: "separate", layout: "0,0,2,4", color: "msx-glass", imageFiller: "cover" },
             items: items
         });
