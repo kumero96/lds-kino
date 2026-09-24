@@ -1,7 +1,7 @@
 {
     "name": "Кинотеатр ЛДС",
     "version": "1.0.0",
-    "parameter": "menu:request:interaction:menu@{PREFIX}{SERVER}/msx/plugin.html?v=5",
+    "parameter": "menu:request:interaction:menu@{PREFIX}{SERVER}/msx/plugin.html?v=6",
     "welcome": "none",
     "launcher": {
         "image": "https://kumero96.github.io/lds-kino/msx/img/launcher.png",

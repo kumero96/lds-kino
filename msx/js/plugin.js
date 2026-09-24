@@ -632,7 +632,7 @@ function catalog(id, callback) {
         if (s.offset > 0) {
             var prev = JSON.parse(JSON.stringify(s));
             prev.offset = Math.max(0, s.offset - PAGE_SIZE);
-            items.push({ type: "separate", color: "msx-glass", icon: "arrow-back", iconSize: "large", title: "Предыдущие " + PAGE_SIZE, action: "replace:content:catalog:" + req(catId(prev)) });
+            items.push({ type: "separate", color: "msx-glass", icon: "arrow-back", iconSize: "large", title: "Предыдущие " + PAGE_SIZE, action: "back" });
         }
         for (var j = 0; j < movies.length; j++) {
             var pi = posterItem(movies[j]);
@@ -643,7 +643,7 @@ function catalog(id, callback) {
         if (s.offset + PAGE_SIZE < total) {
             var next = JSON.parse(JSON.stringify(s));
             next.offset = s.offset + PAGE_SIZE;
-            items.push({ type: "separate", color: "msx-glass", icon: "arrow-forward", iconSize: "large", title: "Следующие " + PAGE_SIZE, action: "replace:content:catalog:" + req(catId(next)) });
+            items.push({ type: "separate", color: "msx-glass", icon: "arrow-forward", iconSize: "large", title: "Следующие " + PAGE_SIZE, action: "content:" + req(catId(next)) });
         }
         if (!movies.length) {
             items.push({ type: "space", color: "msx-glass", label: "Ничего не найдено — уберите часть фильтров" });
