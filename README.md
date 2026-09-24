@@ -11,4 +11,4 @@
 3. Введите адрес: `kumero96.github.io/lds-kino` и подтвердите.
 
 Попробовать в браузере на компьютере:
-https://msx.benzac.de/?start=menu:request:interaction:menu@https://kumero96.github.io/lds-kino/msx/plugin.html
+https://msx.benzac.de/?start=menu:request:interaction:menu@https://kumero96.github.io/lds-kino/msx/plugin.html?v=5
