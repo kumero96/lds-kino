@@ -238,8 +238,7 @@ var Scroll = {
         }
         var h = window.innerHeight;
         var rem = h / 54;
-        var phone = Scroll.phone();
-        var cur = phone ? document.getElementById("page").scrollTop : -(sc._y || 0);
+        var cur = document.getElementById("page").scrollTop;
         var headH = 6.5 * rem;
         var elTop = top, elBottom = top + e.offsetHeight;
         // заголовок ряда тоже должен быть виден
@@ -266,19 +265,36 @@ var Scroll = {
         }
         return null;
     },
-    // на телефоне страница листается пальцем (обычная прокрутка), на ТВ — сдвигом
     phone: function() {
         return (" " + document.documentElement.className + " ").indexOf(" phone ") >= 0;
     },
+    // обычная прокрутка: браузер перерисовывает только открывшуюся часть экрана
+    // (сдвиг всего слоя страницы оказался слишком тяжёлым для видеокарты ТВ)
     to: function(sc, y) {
         sc._y = -y;
-        if (Scroll.phone()) {
-            document.getElementById("page").scrollTop = y;
-            return;
+        document.getElementById("page").scrollTop = y;
+        Cull.check();
+    }
+};
+
+/* ---------- далёкие от экрана ряды не рисуем (экономия видеопамяти ТВ) ---------- */
+
+var Cull = {
+    timer: null,
+    check: function() {
+        clearTimeout(Cull.timer);
+        Cull.timer = setTimeout(Cull.run, 30);
+    },
+    run: function() {
+        var h = window.innerHeight;
+        var list = document.querySelectorAll("#page .row, #page .grid > .card");
+        for (var i = 0; i < list.length; i++) {
+            var r = list[i].getBoundingClientRect();
+            var far = r.bottom < -h * 0.6 || r.top > h * 1.6;
+            var has = (" " + list[i].className + " ").indexOf(" far ") >= 0;
+            if (far && !has) list[i].className += " far";
+            else if (!far && has) list[i].className = list[i].className.replace(/\s*far/g, "");
         }
-        var t = "translate3d(0," + (-y) + "px,0)";
-        sc.style.webkitTransform = t;
-        sc.style.transform = t;
     }
 };
 
@@ -359,6 +375,7 @@ var Router = {
                 }
                 if (!target) target = defaultEl || Focus.first();
                 Lazy.check();
+                Cull.check();
                 // пока открыто окно или меню — не отбираем у них фокус, только запоминаем
                 if (Modal.active) {
                     if (target) Modal.returnTo = target;

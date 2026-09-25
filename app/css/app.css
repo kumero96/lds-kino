@@ -92,11 +92,14 @@ body::before {
     overflow: hidden;
 }
 .scroll {
-    position: absolute;
-    top: 0; left: 0; right: 0;
+    position: relative;
     padding: 6rem 0 6rem;
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
+}
+.far { visibility: hidden; }
+#diag {
+    position: fixed; right: 0.6rem; bottom: 0.4rem; z-index: 90;
+    font-size: 0.9rem; color: #8DACC7; background: rgba(0, 0, 0, 0.6);
+    padding: 0.2rem 0.6rem; border-radius: 0.4rem; pointer-events: none;
 }
 
 .row { margin-bottom: 1.8rem; }

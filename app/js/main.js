@@ -14,6 +14,38 @@ window.onerror = function(msg, src, line) {
     try { toast("Ошибка: " + msg + " (" + line + ")"); } catch (e) {}
 };
 
+// Временная диагностика: версия, браузер телевизора и скорость отклика на нажатия.
+var APP_VERSION = "12";
+var Diag = {
+    el: null,
+    info: "",
+    init: function() {
+        var ua = navigator.userAgent;
+        var m = ua.match(/Tizen [\d.]+|Web0S|webOS[^;)]*|Android [\d.]+/);
+        var c = ua.match(/Chrome\/(\d+)/);
+        Diag.info = "v" + APP_VERSION + " · " + (m ? m[0] : "браузер") + (c ? " · Chrome " + c[1] : "") +
+            " · " + window.innerWidth + "×" + window.innerHeight + (window.devicePixelRatio ? " ×" + window.devicePixelRatio : "");
+        Diag.el = document.createElement("div");
+        Diag.el.id = "diag";
+        Diag.el.innerHTML = Diag.info;
+        document.body.appendChild(Diag.el);
+        var t0 = 0;
+        window.addEventListener("keydown", function() {
+            t0 = Date.now();
+        }, true);
+        document.addEventListener("keydown", function(ev) {
+            var t1 = Date.now();
+            var raf = window.requestAnimationFrame || function(f) { setTimeout(f, 16); };
+            raf(function() {
+                raf(function() {
+                    var t2 = Date.now();
+                    Diag.el.innerHTML = Diag.info + " · код " + ev.keyCode + ": обработка " + (t1 - t0) + " мс, кадр " + (t2 - t0) + " мс";
+                });
+            });
+        }, false);
+    }
+};
+
 (function start() {
     fitScreen();
     window.addEventListener("resize", fitScreen);
@@ -31,5 +63,6 @@ window.onerror = function(msg, src, line) {
             }
         }
     } catch (e) {}
+    Diag.init();
     Router.root("home");
 })();
