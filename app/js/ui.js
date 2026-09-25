@@ -354,6 +354,16 @@ var Router = {
                 }
                 if (!target) target = defaultEl || Focus.first();
                 Lazy.check();
+                // пока открыто окно или меню — не отбираем у них фокус, только запоминаем
+                if (Modal.active) {
+                    if (target) Modal.returnTo = target;
+                    return;
+                }
+                if (Menu.open) {
+                    if (target) Menu.returnTo = target;
+                    return;
+                }
+                if (Player.active) return;
                 if (target) Focus.set(target);
                 else Focus.cur = null;
             }
