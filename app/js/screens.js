@@ -131,7 +131,7 @@ Screens.home = function(params, ctx) {
         var any = false;
         var hist = Store.history();
         if (hist.length) {
-            root.appendChild(row("Продолжить просмотр", hist.slice(0, 20), "hist", hist.length > 20 ? function() { Router.go("history", { title: "История" }); } : null));
+            root.appendChild(row("Продолжить просмотр", hist.slice(0, 12), "hist", hist.length > 12 ? function() { Router.go("history", { title: "История" }); } : null));
             any = true;
         }
         var favs = Store.favorites(), withNew = [];
@@ -141,7 +141,7 @@ Screens.home = function(params, ctx) {
             if (!results[i] || !results[i].length) continue;
             any = true;
             (function(r, i) {
-                root.appendChild(row(r.title, results[i], "r" + i, r.cat ? function() {
+                root.appendChild(row(r.title, results[i].slice(0, 12), "r" + i, r.cat ? function() {
                     Router.go("catalog", { title: r.title, filters: r.cat });
                 } : null));
             })(HOME_ROWS[i], i);
@@ -166,7 +166,7 @@ Screens.home = function(params, ctx) {
             if (r.best) {
                 api("Video.getBestsellers", {}, function(x) { ok(flatten(x.bestsellers)); }, bad);
             } else {
-                var p = { offset: 0, size: 20 };
+                var p = { offset: 0, size: 12 };
                 for (var k in r.params) p[k] = r.params[k];
                 api("Video.getCatalog", p, function(x) { ok(parseMovies(x.movies)); }, bad);
             }

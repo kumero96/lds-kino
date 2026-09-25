@@ -193,7 +193,7 @@ var Lazy = {
     timer: null,
     check: function() {
         clearTimeout(Lazy.timer);
-        Lazy.timer = setTimeout(Lazy.run, 60);
+        Lazy.timer = setTimeout(Lazy.run, 200);
     },
     run: function() {
         var list = document.querySelectorAll("#page [data-bg]");
@@ -276,7 +276,7 @@ var Scroll = {
             document.getElementById("page").scrollTop = y;
             return;
         }
-        var t = "translateY(" + (-y) + "px)";
+        var t = "translate3d(0," + (-y) + "px,0)";
         sc.style.webkitTransform = t;
         sc.style.transform = t;
     }
@@ -583,6 +583,11 @@ var Keys = {
             }
             if (code === KEY.LEFT || code === KEY.RIGHT || code === KEY.UP || code === KEY.DOWN) {
                 ev.preventDefault();
+                // пока телевизор не дорисовал прошлый шаг — лишние нажатия пропускаем,
+                // иначе они копятся и интерфейс «догоняет» их секундами
+                if (Keys.busy) return;
+                Keys.busy = true;
+                Keys.release();
                 var dir = code === KEY.LEFT ? "left" : code === KEY.RIGHT ? "right" : code === KEY.UP ? "up" : "down";
                 var moved = Focus.move(dir);
                 if (!moved && dir === "left" && !Menu.open && !Modal.active && !Player.active) Menu.show();
@@ -605,6 +610,17 @@ var Keys = {
                 } catch (e) {}
             }
         });
+    },
+
+    busy: false,
+
+    // снять блокировку после того, как браузер нарисует кадр
+    release: function() {
+        var done = function() { Keys.busy = false; };
+        if (window.requestAnimationFrame) {
+            window.requestAnimationFrame(function() { window.requestAnimationFrame(done); });
+            setTimeout(done, 400);
+        } else setTimeout(done, 60);
     },
 
     // true — «Назад» обработан внутри приложения

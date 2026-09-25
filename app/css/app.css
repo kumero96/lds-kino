@@ -16,14 +16,11 @@ html, body {
 }
 
 body::before {
-    /* фирменный фон: синее и оранжевое свечение */
+    /* фирменный фон — готовая картинка (градиенты слишком тяжело перерисовывать на ТВ) */
     content: "";
     position: fixed;
     top: 0; right: 0; bottom: 0; left: 0;
-    background:
-        radial-gradient(60rem 40rem at 0% 0%, rgba(24, 128, 208, 0.32), transparent 70%),
-        radial-gradient(50rem 35rem at 100% 100%, rgba(240, 78, 35, 0.16), transparent 70%),
-        #06111D;
+    background: #06111D url("../img/background.jpg") center / cover no-repeat;
     z-index: -2;
 }
 
@@ -39,7 +36,8 @@ body::before {
     align-items: center;
     padding: 0 3rem;
     z-index: 20;
-    background: linear-gradient(to bottom, rgba(6, 17, 29, 0.98) 72%, rgba(6, 17, 29, 0));
+    background: #06111D;
+    height: 5rem;
 }
 #top .logo { height: 2.8rem; margin: 0 0.6rem; }
 #top .title { font-size: 1.7rem; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -63,12 +61,12 @@ body::before {
     padding: 6.5rem 1.2rem 2rem;
     background: rgba(6, 17, 29, 0.97);
     border-right: 1px solid rgba(79, 170, 240, 0.25);
+    -webkit-transform: translateX(-100%);
     transform: translateX(-100%);
-    transition: transform 0.25s;
     z-index: 30;
     overflow: hidden;
 }
-#menu.open { transform: none; }
+#menu.open { -webkit-transform: none; transform: none; }
 #menu .sep { color: #8DACC7; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1rem; margin: 1.2rem 1.2rem 0.4rem; }
 .menu-item {
     display: flex; align-items: center;
@@ -82,9 +80,9 @@ body::before {
 .menu-item.focus { background: #fff; color: #06111D; }
 #menu-shade {
     position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0, 0, 0, 0.45);
-    opacity: 0; pointer-events: none; transition: opacity 0.25s; z-index: 25;
+    display: none; z-index: 25;
 }
-#menu-shade.on { opacity: 1; }
+#menu-shade.on { display: block; }
 
 /* ---------- страницы ---------- */
 
@@ -97,7 +95,8 @@ body::before {
     position: absolute;
     top: 0; left: 0; right: 0;
     padding: 6rem 0 6rem;
-    transition: transform 0.25s ease-out;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
 }
 
 .row { margin-bottom: 1.8rem; }
@@ -141,11 +140,9 @@ body::before {
     padding-top: 148%;
     border-radius: 1rem;
     background: #10223A center / cover no-repeat;
-    box-shadow: 0 0 0 0 transparent;
-    transition: transform 0.15s, box-shadow 0.15s;
     overflow: hidden;
 }
-.card.focus .img { transform: scale(1.06); box-shadow: 0 0 0 0.3rem #fff, 0 0 2rem rgba(24, 128, 208, 0.7); }
+.card.focus .img { box-shadow: 0 0 0 0.3rem #fff; }
 .card .name { margin-top: 0.7rem; font-size: 1.15rem; line-height: 1.35; max-height: 2.7em; overflow: hidden; }
 .card .year { color: #8DACC7; font-size: 1rem; margin-top: 0.15rem; }
 .card .noimg { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; color: #8DACC7; font-size: 1.1rem; }
