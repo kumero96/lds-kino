@@ -6,4 +6,4 @@
 
 - Открыть в браузере (ТВ, телефон, компьютер): https://kumero96.github.io/lds-kino/app/
 - Телевизоры Samsung, LG и другие — через приложение **Media Station X**:
-  Settings → Start Parameter → Setup → адрес `kumero96.github.io/lds-kino`
+  Settings → Start Parameter → Setup → адрес `kumero96.github.io`
