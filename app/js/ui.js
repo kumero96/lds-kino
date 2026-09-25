@@ -137,7 +137,7 @@ var Focus = {
         var c = Focus.cur.getBoundingClientRect();
         var cx = c.left + c.width / 2, cy = c.top + c.height / 2;
         var list = Focus.items();
-        var best = null, bestScore = 1e9, bestSame = null, bestSameScore = 1e9;
+        var best = null, bestScore = 1e9, bestSame = null, bestSameScore = 1e9, vert = [];
         for (var i = 0; i < list.length; i++) {
             var e = list[i];
             if (e === Focus.cur) continue;
@@ -159,15 +159,20 @@ var Focus = {
                     bestScore = sh;
                 }
             } else {
-                d = dir === "down" ? r.top - c.top : c.bottom - r.bottom;
-                if (d <= 2 || (dir === "down" ? y <= cy : y >= cy)) continue;
-                side = Math.abs(x - cx);
-                // вертикальная близость важнее горизонтальной, но из ряда постеров
-                // переходим к ближайшему по горизонтали элементу следующего ряда
-                var sv = d * 1.5 + side;
-                if (sv < bestScore) {
-                    best = e;
-                    bestScore = sv;
+                d = dir === "down" ? r.top - c.bottom : c.top - r.bottom;
+                if (dir === "down" ? y <= cy + 2 : y >= cy - 2) continue;
+                vert.push({ e: e, d: Math.max(0, d), x: Math.abs(x - cx) });
+            }
+        }
+        // вверх/вниз: сначала ближайший ряд, в нём — ближайший по горизонтали элемент
+        if (vert.length) {
+            var minD = 1e9, k;
+            for (k = 0; k < vert.length; k++) if (vert[k].d < minD) minD = vert[k].d;
+            var band = minD + Math.max(12, c.height * 0.4);
+            for (k = 0; k < vert.length; k++) {
+                if (vert[k].d <= band && vert[k].x < bestScore) {
+                    best = vert[k].e;
+                    bestScore = vert[k].x;
                 }
             }
         }
