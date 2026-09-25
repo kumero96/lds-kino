@@ -42,7 +42,7 @@ function card(m, key) {
             done = w >= total;
             if (done) label = "✓ Просмотрено";
             else if (w > 0) label = w + " из " + total + " серий";
-            else if (lastEp && lastEp.title) label = lastEp.title.replace("Сезон ", "С").replace(", серия ", " · серия ");
+            else if (lastEp && /^(Сезон|Серия)/.test(lastEp.title)) label = lastEp.title.replace("Сезон ", "С").replace(", серия ", " · серия ");
         }
     } else {
         var last = Store.last(m.id);

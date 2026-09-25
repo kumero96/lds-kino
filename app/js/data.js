@@ -184,8 +184,13 @@ function parseDetails(m) {
     var cast = [];
     var ps = m.persones || [];
     for (i = 0; i < ps.length && cast.length < 8; i++) if (ps[i] && ps[i].name) cast.push(ps[i].name);
+    // сериал — только если файлы размечены как серии (у фильма бывает несколько файлов: 4K, HDR и т.п.)
     var maxEp = 0;
-    for (i = 0; i < groups.length; i++) maxEp = Math.max(maxEp, groups[i].files.length);
+    for (i = 0; i < groups.length; i++) {
+        var eps = 0;
+        for (var j = 0; j < groups[i].files.length; j++) if (groups[i].files[j].episode > 0) eps++;
+        maxEp = Math.max(maxEp, eps);
+    }
     return {
         id: String(m.movie_id),
         name: cleanName(m.name),
