@@ -398,9 +398,12 @@ var Top = {
 
 /* ---------- фон по выбранному фильму ---------- */
 
+// Размытый фон по выбранному фильму отключён: фильтр blur подвешивал отрисовку
+// (в браузере и тем более на слабых телевизорах). Оставлен фирменный фон.
 var Backdrop = {
     timer: null,
     set: function(url) {
+        return;
         var b = document.getElementById("backdrop");
         clearTimeout(Backdrop.timer);
         if (!url) {
