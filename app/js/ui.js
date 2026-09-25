@@ -629,14 +629,10 @@ var Exit = {
         Modal.show(d, null, no);
     },
     now: function() {
-        // открыли из MSX или по ссылке — просто вернуться туда (MSX останется открытым)
-        if (window.history.length > Router.pushed + 1) {
-            window.history.go(-(Router.pushed + 1));
-            return;
-        }
-        // запущено напрямую — закрыть приложение средствами телевизора
+        // на телевизоре — закрыть приложение целиком (как любое приложение ТВ).
+        // Возвращаться в MSX нельзя: он сразу снова откроет кинотеатр.
         try {
-            if (window.tizen) {
+            if (window.tizen && window.tizen.application) {
                 window.tizen.application.getCurrentApplication().exit();
                 return;
             }
@@ -647,6 +643,16 @@ var Exit = {
                 return;
             }
         } catch (e) {}
-        try { window.close(); } catch (e) {}
+        try {
+            if (window.PalmSystem && window.PalmSystem.platformBack) {
+                window.PalmSystem.platformBack();
+                return;
+            }
+        } catch (e) {}
+        // Android TV / браузер: назад на страницу, с которой открыли
+        window.history.go(-(Router.pushed + 1));
+        setTimeout(function() {
+            try { window.close(); } catch (e) {}
+        }, 300);
     }
 };
