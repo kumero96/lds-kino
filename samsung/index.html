@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кинотеатр ЛДС на Samsung</title>
+<style>
+  :root { --bg:#06111D; --panel:#10223A; --panel2:#0B1A2C; --blue:#1880D0; --orange:#F04E23; --text:#E8EEF5; --dim:#9DB6CC; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 56px; }
+  h1 { margin: 16px 0 6px; font-size: 1.9em; line-height: 1.2; }
+  h2 { margin: 0 0 12px; font-size: 1.3em; }
+  p, li { color: var(--dim); line-height: 1.6; }
+  b { color: var(--text); }
+  .lead { font-size: 1.05em; }
+  .card { background: var(--panel); border-radius: 14px; padding: 20px 22px; margin: 18px 0; }
+  .step { display: flex; align-items: flex-start; }
+  .num { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 50%; background: var(--blue); color:#fff; font-weight: 700; font-size: 1.2em; display:flex; align-items:center; justify-content:center; margin-right: 16px; }
+  .step > .body { flex: 1; min-width: 0; }
+  .step ol, .step ul { padding-left: 20px; margin: 8px 0 0; }
+  code { background: var(--panel2); padding: 2px 8px; border-radius: 6px; color: var(--text); font-size: 1.05em; word-break: break-all; }
+  .addr { display:block; text-align:center; font-size: 1.5em; font-weight: 700; letter-spacing: .02em; background: var(--panel2); border: 2px dashed var(--orange); border-radius: 12px; padding: 14px; margin: 12px 0; color: #fff; word-break: break-all; }
+  .path { color: var(--text); font-weight: 600; }
+  .note { border-left: 4px solid var(--orange); background: var(--panel2); border-radius: 8px; padding: 10px 14px; margin: 12px 0 0; }
+  .note p { margin: 0; }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 8px 6px; border-top: 1px solid #1C3452; color: var(--dim); vertical-align: top; }
+  td:first-child { color: var(--text); font-weight: 600; white-space: nowrap; padding-right: 14px; }
+  tr:first-child td { border-top: 0; }
+  details { background: var(--panel2); border-radius: 10px; padding: 10px 14px; margin: 10px 0; }
+  summary { cursor: pointer; color: var(--text); font-weight: 600; }
+  details p { margin: 8px 0 2px; }
+  a { color: #5DB2F0; }
+  a.btn { display:inline-block; background: var(--orange); color:#fff; padding: 10px 22px; border-radius: 30px; text-decoration:none; font-weight:600; margin-top: 6px; }
+  .muted { font-size: .9em; }
+  @media (max-width: 480px) {
+    h1 { font-size: 1.5em; }
+    .num { flex-basis: 32px; width: 32px; height: 32px; font-size: 1em; margin-right: 12px; }
+    .card { padding: 16px; }
+    td:first-child { white-space: normal; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <img src="../msx/img/logo.png" alt="ЛДС" height="52">
+  <h1>Кинотеатр ЛДС на телевизоре Samsung</h1>
+  <p class="lead">Пошаговая установка через бесплатное приложение <b>Media Station X</b> (MSX). Займёт 5 минут, делается один раз.</p>
+
+  <div class="card">
+    <h2>Что понадобится</h2>
+    <ul>
+      <li>Телевизор <b>Samsung Smart TV</b> (система Tizen, примерно 2016 года и новее).</li>
+      <li>Телевизор подключён к <b>интернету ЛДС</b> — через другого провайдера или VPN кинотеатр не откроется.</li>
+      <li>Пульт от телевизора.</li>
+    </ul>
+  </div>
+
+  <div class="card step">
+    <span class="num">1</span>
+    <div class="body">
+      <h2>Установите Media Station X</h2>
+      <ol>
+        <li>Нажмите на пульте кнопку <b>Home</b> (домик) — откроется Smart Hub.</li>
+        <li>Перейдите в <span class="path">Приложения (Apps)</span>.</li>
+        <li>Выберите значок <b>лупы</b> (поиск) и введите <code>Media Station X</code>.</li>
+        <li>Откройте приложение с синим значком и нажмите <b>Установить</b>.</li>
+        <li>После установки нажмите <b>Открыть</b>.</li>
+      </ol>
+      <div class="note"><p>Если магазин просит войти в учётную запись Samsung — войдите или создайте её на телевизоре, это бесплатно.</p></div>
+    </div>
+  </div>
+
+  <div class="card step">
+    <span class="num">2</span>
+    <div class="body">
+      <h2>Укажите адрес кинотеатра</h2>
+      <ol>
+        <li>В Media Station X откройте <span class="path">Settings (Настройки)</span> — значок шестерёнки в меню.</li>
+        <li>Выберите <span class="path">Start Parameter</span> → <span class="path">Setup</span>.</li>
+        <li>С помощью экранной клавиатуры введите адрес:</li>
+      </ol>
+      <span class="addr">kumero96.github.io</span>
+      <ol start="4">
+        <li>Нажмите кнопку подтверждения (галочка / <b>OK</b>) и согласитесь с перезапуском.</li>
+      </ol>
+      <div class="note"><p>Вводите только буквы, цифры и точки — без <code>http://</code>, пробелов и знака «/». Проверьте, что в адресе есть цифры <b>96</b>.</p></div>
+    </div>
+  </div>
+
+  <div class="card step">
+    <span class="num">3</span>
+    <div class="body">
+      <h2>Готово — кинотеатр открывается сам</h2>
+      <p>После перезапуска Media Station X сразу откроет <b>Кинотеатр ЛДС</b>. Дальше просто запускайте Media Station X — кинотеатр будет открываться автоматически.</p>
+      <p>Чтобы приложение было под рукой, в Smart Hub наведите на значок Media Station X, нажмите и удерживайте <b>OK</b> (или кнопку вниз) и выберите <span class="path">Переместить</span> — поставьте его в начало ленты.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Управление пультом</h2>
+    <table>
+      <tr><td>Стрелки, OK</td><td>выбор фильма, открыть</td></tr>
+      <tr><td>Влево</td><td>из первого столбца — меню разделов (Главная, Поиск, Каталог, Избранное, История)</td></tr>
+      <tr><td>Назад</td><td>вернуться; на главной — выйти из кинотеатра</td></tr>
+      <tr><td>В плеере</td><td>влево/вправо — перемотка, OK — пауза, вверх/вниз — панель (качество, озвучка)</td></tr>
+    </table>
+    <p class="muted">Просмотр запоминается: фильм или серия продолжится с того же места, в «Истории» видно, что вы уже смотрели.</p>
+  </div>
+
+  <div class="card">
+    <h2>Если что-то не получилось</h2>
+    <details>
+      <summary>Не нахожу Media Station X в магазине</summary>
+      <p>Проверьте написание в поиске. На некоторых старых моделях или в отдельных регионах приложения может не быть — тогда откройте кинотеатр во встроенном браузере телевизора (<b>Internet</b>) по адресу <code>kumero96.github.io/lds-kino/app</code> и добавьте страницу в закладки.</p>
+    </details>
+    <details>
+      <summary>На клавиатуре нет знака «/»</summary>
+      <p>Он и не нужен — введите ровно <code>kumero96.github.io</code>.</p>
+    </details>
+    <details>
+      <summary>Пустой экран или ошибка загрузки</summary>
+      <p>Убедитесь, что телевизор подключён к интернету ЛДС, и проверьте адрес на опечатки. Перезапустите Media Station X: выйдите из приложения кнопкой <b>Назад</b>/<b>Exit</b> и откройте снова.</p>
+    </details>
+    <details>
+      <summary>Фильмы не запускаются или не грузятся постеры</summary>
+      <p>Кинотеатр работает только в сети ЛДС. Отключите VPN на роутере, если он есть. Если не играет один конкретный фильм — в его карточке нажмите «Сообщить о проблеме».</p>
+    </details>
+    <details>
+      <summary>Как вернуть Media Station X как было</summary>
+      <p><span class="path">Settings → Start Parameter → Reset</span>, затем перезапустите приложение.</p>
+    </details>
+    <details>
+      <summary>У меня не Samsung</summary>
+      <p>Media Station X есть и для <b>LG</b> (магазин LG Content Store), настройка та же: адрес <code>kumero96.github.io</code>. На Android TV лучше установить отдельное приложение Кинотеатр ЛДС.</p>
+    </details>
+  </div>
+
+  <p><a class="btn" href="../app/">Открыть кинотеатр в браузере</a></p>
+  <p class="muted"><a href="../">← На главную страницу</a></p>
+</main>
+</body>
+</html>
