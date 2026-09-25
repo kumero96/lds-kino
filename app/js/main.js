@@ -20,6 +20,8 @@ var Diag = {
     el: null,
     info: "",
     init: function() {
+        // показывается только с ?debug=1 в адресе
+        if (!/[?&]debug=1/.test(window.location.search)) return;
         var ua = navigator.userAgent;
         var m = ua.match(/Tizen [\d.]+|Web0S|webOS[^;)]*|Android [\d.]+/);
         var c = ua.match(/Chrome\/(\d+)/);

@@ -2,7 +2,7 @@
     "name": "Кинотеатр ЛДС",
     "version": "2.0.0",
     "parameter": "content:{PREFIX}{SERVER}/msx/start.json",
-    "action": "[settings:validate_links:0|link:https://kumero96.github.io/lds-kino/app/?v=12]",
+    "action": "[settings:validate_links:0|link:https://kumero96.github.io/lds-kino/app/?v=13]",
     "headline": "Кинотеатр ЛДС",
     "extension": "фильмы и сериалы",
     "launcher": {
@@ -26,7 +26,7 @@
             "focus": true,
             "icon": "play-arrow",
             "label": "Открыть кинотеатр",
-            "action": "link:https://kumero96.github.io/lds-kino/app/?v=12"
+            "action": "link:https://kumero96.github.io/lds-kino/app/?v=13"
         }, {
             "type": "control",
             "layout": "0,1,5,1",
